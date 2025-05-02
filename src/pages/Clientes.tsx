@@ -9,113 +9,74 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Phone, Mail, MapPin, Package } from "lucide-react";
+import { Search, Plus, Phone, Mail, MapPin, Package, User, Edit, Trash2, Eye } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Cliente {
-  id: string;
-  nombre: string;
-  contacto?: string;
-  email?: string;
-  telefono?: string;
-  direccion?: string;
-  conservadores?: number;
-}
-
-// Datos de ejemplo
-const clientesData: Cliente[] = [
-  {
-    id: "C001",
-    nombre: "Supermercados Norte",
-    contacto: "Juan Pérez",
-    email: "juan.perez@norte.com",
-    telefono: "+52 555 123 4567",
-    direccion: "Av. Principal #123, Centro",
-    conservadores: 12,
-  },
-  {
-    id: "C002",
-    nombre: "Tiendas Express",
-    contacto: "María Rodríguez",
-    email: "maria@tiendasexpress.mx",
-    telefono: "+52 555 987 6543",
-    direccion: "Calle Reforma #45, Juárez",
-    conservadores: 8,
-  },
-  {
-    id: "C003",
-    nombre: "Cafetería El Mirador",
-    contacto: "Roberto Gómez",
-    email: "contacto@elmirador.com",
-    telefono: "+52 555 456 7890",
-    direccion: "Plaza Central #8, Centro",
-    conservadores: 2,
-  },
-  {
-    id: "C004",
-    nombre: "Restaurante La Terraza",
-    contacto: "Carmen López",
-    email: "reservas@laterraza.mx",
-    telefono: "+52 555 234 5678",
-    direccion: "Av. de los Pinos #67, Las Flores",
-    conservadores: 3,
-  },
-  {
-    id: "C005",
-    nombre: "Hotel Panorama",
-    contacto: "Alejandro Díaz",
-    email: "reservaciones@hotelpanorama.com",
-    telefono: "+52 555 876 5432",
-    direccion: "Blvd. Costero #215, Zona Turística",
-    conservadores: 6,
-  },
-  {
-    id: "C006",
-    nombre: "Supermercado El Ahorro",
-    contacto: "Laura Sánchez",
-    email: "laura@elahorro.com.mx",
-    telefono: "+52 555 345 6789",
-    direccion: "Calle Morelos #78, Centro",
-    conservadores: 10,
-  },
-];
+import { useClientes, Cliente } from "@/hooks/useClientes";
+import { ClienteDialog } from "@/components/clientes/ClienteDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Clientes = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { clientes, isLoading, createCliente, updateCliente, deleteCliente } = useClientes();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  
+  // Dialog states
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | undefined>(undefined);
 
-  // Implementaremos esto más adelante con Supabase
-  const { data: clientesSupabase, isLoading } = useQuery({
-    queryKey: ["clientes"],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase.from("clientes").select(`
-          *,
-          conservadores(id)
-        `);
-        
-        if (error) throw error;
-        return data || [];
-      } catch (error) {
-        console.error("Error fetching clientes:", error);
-        return [];
-      }
-    },
-    enabled: false, // Deshabilitamos hasta tener la tabla en Supabase
-  });
-
-  // Por ahora usamos los datos de ejemplo
-  const clientes = clientesData;
-
-  const filteredClientes = clientes.filter((cliente) =>
+  // Filter clients based on search term
+  const filteredClientes = clientes?.filter((cliente) =>
     Object.values(cliente).some(
       (value) =>
         typeof value === "string" &&
         value.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  );
+  ) || [];
+
+  // Handler functions
+  const handleCreate = (data: Omit<Cliente, "id">) => {
+    createCliente.mutate(data);
+  };
+
+  const handleUpdate = (data: Cliente) => {
+    if (selectedCliente) {
+      updateCliente.mutate({ ...data, id: selectedCliente.id });
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedCliente) {
+      deleteCliente.mutate(selectedCliente.id);
+      setOpenDeleteDialog(false);
+    }
+  };
+
+  const handleViewDetails = (cliente: Cliente) => {
+    setSelectedCliente(cliente);
+    setOpenViewDialog(true);
+  };
+
+  const handleEdit = (cliente: Cliente) => {
+    setSelectedCliente(cliente);
+    setOpenEditDialog(true);
+  };
+
+  const handleDeletePrompt = (cliente: Cliente) => {
+    setSelectedCliente(cliente);
+    setOpenDeleteDialog(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p>Cargando clientes...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -129,7 +90,7 @@ const Clientes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button>
+        <Button onClick={() => setOpenCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-1" />
           Nuevo Cliente
         </Button>
@@ -137,15 +98,15 @@ const Clientes = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-4">
         {filteredClientes.map((cliente) => (
-          <Card key={cliente.id}>
-            <CardHeader>
+          <Card key={cliente.id} className="overflow-hidden">
+            <CardHeader className="pb-2">
               <CardTitle>{cliente.nombre}</CardTitle>
               <CardDescription>ID: {cliente.id}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {cliente.contacto && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Contacto</p>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">{cliente.contacto}</p>
                 </div>
               )}
@@ -173,9 +134,31 @@ const Clientes = () => {
                   <p className="text-sm font-medium">{cliente.conservadores} conservadores</p>
                 </div>
               )}
-              <div className="pt-2">
-                <Button variant="outline" size="sm" className="w-full">
-                  Ver detalles
+              <div className="pt-3 flex gap-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(cliente)}
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1" />
+                  Ver
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEdit(cliente)}
+                >
+                  <Edit className="h-3.5 w-3.5 mr-1" />
+                  Editar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-red-500 hover:text-red-600"
+                  onClick={() => handleDeletePrompt(cliente)}
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                  Eliminar
                 </Button>
               </div>
             </CardContent>
@@ -187,10 +170,55 @@ const Clientes = () => {
         <div className="text-center py-12">
           <h3 className="text-lg font-medium">No se encontraron clientes</h3>
           <p className="text-muted-foreground mt-1">
-            Intenta cambiar los términos de búsqueda
+            Intenta cambiar los términos de búsqueda o crear nuevos clientes
           </p>
         </div>
       )}
+
+      {/* Create Dialog */}
+      <ClienteDialog
+        title="Crear Cliente"
+        description="Ingresa los datos del nuevo cliente"
+        open={openCreateDialog}
+        setOpen={setOpenCreateDialog}
+        onSubmit={handleCreate}
+        isSubmitting={createCliente.isPending}
+        mode="create"
+      />
+
+      {/* View Dialog */}
+      <ClienteDialog
+        title="Detalles del Cliente"
+        description="Información completa del cliente"
+        cliente={selectedCliente}
+        open={openViewDialog}
+        setOpen={setOpenViewDialog}
+        mode="view"
+      />
+
+      {/* Edit Dialog */}
+      <ClienteDialog
+        title="Editar Cliente"
+        description="Modifica la información del cliente"
+        cliente={selectedCliente}
+        open={openEditDialog}
+        setOpen={setOpenEditDialog}
+        onSubmit={handleUpdate}
+        isSubmitting={updateCliente.isPending}
+        mode="edit"
+      />
+
+      {/* Delete Dialog */}
+      <ClienteDialog
+        title="Eliminar Cliente"
+        description="Esta acción no se puede deshacer"
+        cliente={selectedCliente}
+        open={openDeleteDialog}
+        setOpen={setOpenDeleteDialog}
+        onDelete={handleDelete}
+        isSubmitting={deleteCliente.isPending}
+        mode="delete"
+      />
     </div>
   );
 };
