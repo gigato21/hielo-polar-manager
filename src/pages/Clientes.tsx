@@ -10,15 +10,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Phone, Mail, MapPin, Package } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Cliente {
   id: string;
   nombre: string;
-  contacto: string;
-  email: string;
-  telefono: string;
-  direccion: string;
-  conservadores: number;
+  contacto?: string;
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  conservadores?: number;
 }
 
 // Datos de ejemplo
@@ -81,8 +84,32 @@ const clientesData: Cliente[] = [
 
 const Clientes = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const isMobile = useIsMobile();
 
-  const filteredClientes = clientesData.filter((cliente) =>
+  // Implementaremos esto más adelante con Supabase
+  const { data: clientesSupabase, isLoading } = useQuery({
+    queryKey: ["clientes"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.from("clientes").select(`
+          *,
+          conservadores(id)
+        `);
+        
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error("Error fetching clientes:", error);
+        return [];
+      }
+    },
+    enabled: false, // Deshabilitamos hasta tener la tabla en Supabase
+  });
+
+  // Por ahora usamos los datos de ejemplo
+  const clientes = clientesData;
+
+  const filteredClientes = clientes.filter((cliente) =>
     Object.values(cliente).some(
       (value) =>
         typeof value === "string" &&
@@ -116,26 +143,36 @@ const Clientes = () => {
               <CardDescription>ID: {cliente.id}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Contacto</p>
-                <p className="text-sm text-muted-foreground">{cliente.contacto}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">{cliente.telefono}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">{cliente.email}</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <p className="text-sm text-muted-foreground">{cliente.direccion}</p>
-              </div>
-              <div className="flex items-center gap-2 pt-1">
-                <Package className="h-4 w-4 text-hielo-600" />
-                <p className="text-sm font-medium">{cliente.conservadores} conservadores</p>
-              </div>
+              {cliente.contacto && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Contacto</p>
+                  <p className="text-sm text-muted-foreground">{cliente.contacto}</p>
+                </div>
+              )}
+              {cliente.telefono && (
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{cliente.telefono}</p>
+                </div>
+              )}
+              {cliente.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{cliente.email}</p>
+                </div>
+              )}
+              {cliente.direccion && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <p className="text-sm text-muted-foreground">{cliente.direccion}</p>
+                </div>
+              )}
+              {cliente.conservadores !== undefined && (
+                <div className="flex items-center gap-2 pt-1">
+                  <Package className="h-4 w-4 text-hielo-600" />
+                  <p className="text-sm font-medium">{cliente.conservadores} conservadores</p>
+                </div>
+              )}
               <div className="pt-2">
                 <Button variant="outline" size="sm" className="w-full">
                   Ver detalles
