@@ -12,25 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Search, Plus, Phone, Mail, MapPin, Package, X } from "lucide-react";
-
-interface Cliente {
-  id: string;
-  nombre: string;
-  contacto: string;
-  email: string;
-  telefono: string;
-  direccion: string;
-  conservadores: number;
-}
-
-// Datos de ejemplo
-const clientesData: Cliente[] = [
-  // ... (tus datos existentes de clientes)
-];
+import { useClientes, Cliente } from "@/hooks/useClientes";
+import { useToast } from "@/hooks/use-toast";
 
 const Clientes = () => {
+  const { clientes, isLoading, createCliente, deleteCliente } = useClientes();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [clientes, setClientes] = useState(clientesData);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [nuevoCliente, setNuevoCliente] = useState<Omit<Cliente, 'id'>>({
     nombre: '',
@@ -50,28 +38,45 @@ const Clientes = () => {
   };
 
   const agregarCliente = () => {
-    const nuevoId = `C${(clientes.length + 1).toString().padStart(3, '0')}`;
-    const clienteCompleto = { ...nuevoCliente, id: nuevoId };
-
-    setClientes([...clientes, clienteCompleto]);
-    setIsDialogOpen(false);
-    setNuevoCliente({
-      nombre: '',
-      contacto: '',
-      email: '',
-      telefono: '',
-      direccion: '',
-      conservadores: 0
+    createCliente.mutate(nuevoCliente, {
+      onSuccess: () => {
+        setIsDialogOpen(false);
+        setNuevoCliente({
+          nombre: '',
+          contacto: '',
+          email: '',
+          telefono: '',
+          direccion: '',
+          conservadores: 0
+        });
+        toast({
+          title: "Cliente creado",
+          description: "El cliente ha sido agregado exitosamente."
+        });
+      }
     });
   };
 
-  const filteredClientes = clientes.filter((cliente) =>
-    Object.values(cliente).some(
-      (value) =>
-        typeof value === "string" &&
-        value.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const eliminarCliente = (id: string) => {
+    deleteCliente.mutate(id, {
+      onSuccess: () => {
+        toast({
+          title: "Cliente eliminado",
+          description: "El cliente ha sido eliminado exitosamente."
+        });
+      }
+    });
+  };
+
+  const filteredClientes = isLoading 
+    ? [] 
+    : clientes?.filter((cliente) =>
+        Object.values(cliente).some(
+          (value) =>
+            typeof value === "string" &&
+            value.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      ) || [];
 
   return (
     <div className="space-y-6">
@@ -182,6 +187,68 @@ const Clientes = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-10">
+          <p>Cargando clientes...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredClientes.length > 0 ? (
+            filteredClientes.map((cliente) => (
+              <Card key={cliente.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle>{cliente.nombre}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => eliminarCliente(cliente.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {cliente.contacto && (
+                    <CardDescription>{cliente.contacto}</CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {cliente.telefono && (
+                    <div className="flex items-center text-sm">
+                      <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{cliente.telefono}</span>
+                    </div>
+                  )}
+                  {cliente.email && (
+                    <div className="flex items-center text-sm">
+                      <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{cliente.email}</span>
+                    </div>
+                  )}
+                  {cliente.direccion && (
+                    <div className="flex items-center text-sm">
+                      <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{cliente.direccion}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center text-sm">
+                    <Package className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span>{cliente.conservadores || 0} conservadores</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full flex justify-center items-center p-10">
+              <p className="text-muted-foreground">
+                {searchTerm
+                  ? "No se encontraron clientes que coincidan con la búsqueda."
+                  : "No hay clientes registrados."}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
