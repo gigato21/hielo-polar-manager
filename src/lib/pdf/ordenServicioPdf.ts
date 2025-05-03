@@ -64,5 +64,4 @@ export const generateOrdenServicioPDF = async (orden: OrdenServicioWithDetails):
   return doc;
 };
 
-// Reexport for backward compatibility
-export { generateOrdenServicioPDF as generateOrdenServicioPDF }
+// Remove the duplicate export line that was here
