@@ -5,13 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import Dashboard from './pages/Dashboard';  // Correct import as default import
+import Dashboard from './pages/Dashboard';  // Default import
 import Clientes from './pages/Clientes';
 import Conservadores from './pages/Conservadores';
 import { MantenimientoPage } from './pages/Mantenimiento';
 import { Reportes } from './pages/Reportes';
-import QRCode from './pages/QRCode.tsx';
-import { EstadisticasPage } from './pages/Estadisticas'; // Now importing the existing file
+import QRCode from './pages/QRCode';  // Removed .tsx extension
+import { EstadisticasPage } from './pages/Estadisticas'; 
 import Configuracion from './pages/Configuracion';
 
 const queryClient = new QueryClient();

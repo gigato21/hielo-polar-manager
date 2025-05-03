@@ -1,6 +1,4 @@
 
-// Define missing types for Supabase
-
 export type TipoServicio = 
   | 'mantenimiento_preventivo'
   | 'mantenimiento_correctivo'
@@ -16,3 +14,6 @@ export type EstadoOrden =
   | 'completada'
   | 'cancelada'
   | 'facturada';
+
+// Define Tables type to fix the "Tables requires between 1 and 2 type arguments" error
+export type Tables<T = any> = T;
