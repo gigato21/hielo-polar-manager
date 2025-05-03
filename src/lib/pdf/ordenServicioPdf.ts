@@ -63,5 +63,3 @@ export const generateOrdenServicioPDF = async (orden: OrdenServicioWithDetails):
   
   return doc;
 };
-
-// Remove the duplicate export line that was here

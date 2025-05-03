@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Card,
@@ -181,8 +182,6 @@ const Clientes = () => {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* ... (el resto de tu código existente para mostrar los clientes) ... */}
     </div>
   );
 };
