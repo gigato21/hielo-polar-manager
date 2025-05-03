@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useSupabaseClient } from './useSupabaseAuth'
 
 export type AlertType =
   | 'LOW_USAGE'
@@ -234,4 +234,4 @@ export function useConservadorAlerts(
     alerts,
     isLoading,
   }
-} 
+}
