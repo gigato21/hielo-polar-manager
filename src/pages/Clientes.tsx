@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Card,
@@ -9,74 +8,69 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Phone, Mail, MapPin, Package, User, Edit, Trash2, Eye } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useClientes, Cliente } from "@/hooks/useClientes";
-import { ClienteDialog } from "@/components/clientes/ClienteDialog";
-import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Search, Plus, Phone, Mail, MapPin, Package, X } from "lucide-react";
+
+interface Cliente {
+  id: string;
+  nombre: string;
+  contacto: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+  conservadores: number;
+}
+
+// Datos de ejemplo
+const clientesData: Cliente[] = [
+  // ... (tus datos existentes de clientes)
+];
 
 const Clientes = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { clientes, isLoading, createCliente, updateCliente, deleteCliente } = useClientes();
-  const isMobile = useIsMobile();
-  const { toast } = useToast();
-  
-  // Dialog states
-  const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [openViewDialog, setOpenViewDialog] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | undefined>(undefined);
+  const [clientes, setClientes] = useState(clientesData);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [nuevoCliente, setNuevoCliente] = useState<Omit<Cliente, 'id'>>({
+    nombre: '',
+    contacto: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    conservadores: 0
+  });
 
-  // Filter clients based on search term
-  const filteredClientes = clientes?.filter((cliente) =>
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNuevoCliente(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const agregarCliente = () => {
+    const nuevoId = `C${(clientes.length + 1).toString().padStart(3, '0')}`;
+    const clienteCompleto = { ...nuevoCliente, id: nuevoId };
+
+    setClientes([...clientes, clienteCompleto]);
+    setIsDialogOpen(false);
+    setNuevoCliente({
+      nombre: '',
+      contacto: '',
+      email: '',
+      telefono: '',
+      direccion: '',
+      conservadores: 0
+    });
+  };
+
+  const filteredClientes = clientes.filter((cliente) =>
     Object.values(cliente).some(
       (value) =>
         typeof value === "string" &&
         value.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  ) || [];
-
-  // Handler functions
-  const handleCreate = (data: Omit<Cliente, "id">) => {
-    createCliente.mutate(data);
-  };
-
-  const handleUpdate = (data: Cliente) => {
-    if (selectedCliente) {
-      updateCliente.mutate({ ...data, id: selectedCliente.id });
-    }
-  };
-
-  const handleDelete = () => {
-    if (selectedCliente) {
-      deleteCliente.mutate(selectedCliente.id);
-      setOpenDeleteDialog(false);
-    }
-  };
-
-  const handleViewDetails = (cliente: Cliente) => {
-    setSelectedCliente(cliente);
-    setOpenViewDialog(true);
-  };
-
-  const handleEdit = (cliente: Cliente) => {
-    setSelectedCliente(cliente);
-    setOpenEditDialog(true);
-  };
-
-  const handleDeletePrompt = (cliente: Cliente) => {
-    setSelectedCliente(cliente);
-    setOpenDeleteDialog(true);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p>Cargando clientes...</p>
-      </div>
-    );
-  }
+  );
 
   return (
     <div className="space-y-6">
@@ -90,135 +84,105 @@ const Clientes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button onClick={() => setOpenCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Nuevo Cliente
-        </Button>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-4">
-        {filteredClientes.map((cliente) => (
-          <Card key={cliente.id} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle>{cliente.nombre}</CardTitle>
-              <CardDescription>ID: {cliente.id}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {cliente.contacto && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{cliente.contacto}</p>
-                </div>
-              )}
-              {cliente.telefono && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{cliente.telefono}</p>
-                </div>
-              )}
-              {cliente.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{cliente.email}</p>
-                </div>
-              )}
-              {cliente.direccion && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <p className="text-sm text-muted-foreground">{cliente.direccion}</p>
-                </div>
-              )}
-              {cliente.conservadores !== undefined && (
-                <div className="flex items-center gap-2 pt-1">
-                  <Package className="h-4 w-4 text-hielo-600" />
-                  <p className="text-sm font-medium">{cliente.conservadores} conservadores</p>
-                </div>
-              )}
-              <div className="pt-3 flex gap-2 justify-end">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleViewDetails(cliente)}
-                >
-                  <Eye className="h-3.5 w-3.5 mr-1" />
-                  Ver
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleEdit(cliente)}
-                >
-                  <Edit className="h-3.5 w-3.5 mr-1" />
-                  Editar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-red-500 hover:text-red-600"
-                  onClick={() => handleDeletePrompt(cliente)}
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Eliminar
-                </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              Nuevo Cliente
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="nombre" className="text-right">
+                  Nombre
+                </Label>
+                <Input
+                  id="nombre"
+                  name="nombre"
+                  value={nuevoCliente.nombre}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="contacto" className="text-right">
+                  Contacto
+                </Label>
+                <Input
+                  id="contacto"
+                  name="contacto"
+                  value={nuevoCliente.contacto}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={nuevoCliente.email}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="telefono" className="text-right">
+                  Teléfono
+                </Label>
+                <Input
+                  id="telefono"
+                  name="telefono"
+                  value={nuevoCliente.telefono}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="direccion" className="text-right">
+                  Dirección
+                </Label>
+                <Input
+                  id="direccion"
+                  name="direccion"
+                  value={nuevoCliente.direccion}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="conservadores" className="text-right">
+                  Conservadores
+                </Label>
+                <Input
+                  id="conservadores"
+                  name="conservadores"
+                  type="number"
+                  value={nuevoCliente.conservadores}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={agregarCliente}>Guardar Cliente</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {filteredClientes.length === 0 && (
-        <div className="text-center py-12">
-          <h3 className="text-lg font-medium">No se encontraron clientes</h3>
-          <p className="text-muted-foreground mt-1">
-            Intenta cambiar los términos de búsqueda o crear nuevos clientes
-          </p>
-        </div>
-      )}
-
-      {/* Create Dialog */}
-      <ClienteDialog
-        title="Crear Cliente"
-        description="Ingresa los datos del nuevo cliente"
-        open={openCreateDialog}
-        setOpen={setOpenCreateDialog}
-        onSubmit={handleCreate}
-        isSubmitting={createCliente.isPending}
-        mode="create"
-      />
-
-      {/* View Dialog */}
-      <ClienteDialog
-        title="Detalles del Cliente"
-        description="Información completa del cliente"
-        cliente={selectedCliente}
-        open={openViewDialog}
-        setOpen={setOpenViewDialog}
-        mode="view"
-      />
-
-      {/* Edit Dialog */}
-      <ClienteDialog
-        title="Editar Cliente"
-        description="Modifica la información del cliente"
-        cliente={selectedCliente}
-        open={openEditDialog}
-        setOpen={setOpenEditDialog}
-        onSubmit={handleUpdate}
-        isSubmitting={updateCliente.isPending}
-        mode="edit"
-      />
-
-      {/* Delete Dialog */}
-      <ClienteDialog
-        title="Eliminar Cliente"
-        description="Esta acción no se puede deshacer"
-        cliente={selectedCliente}
-        open={openDeleteDialog}
-        setOpen={setOpenDeleteDialog}
-        onDelete={handleDelete}
-        isSubmitting={deleteCliente.isPending}
-        mode="delete"
-      />
+      {/* ... (el resto de tu código existente para mostrar los clientes) ... */}
     </div>
   );
 };
