@@ -20,13 +20,19 @@ export const useClientes = () => {
   const { data: clientes, isLoading } = useQuery({
     queryKey: ['clientes'],
     queryFn: async () => {
+      console.log("Ejecutando queryFn para obtener clientes");
       try {
         const { data, error } = await supabase.from("clientes").select(`
           *,
           conservadores:conservadores(id)
-        `)
+        `);
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error en la consulta:", error);
+          throw error;
+        }
+        
+        console.log("Datos obtenidos de Supabase:", data);
         
         return data.map(cliente => ({
           ...cliente,
@@ -41,33 +47,29 @@ export const useClientes = () => {
 
   const createCliente = useMutation({
     mutationFn: async (newCliente: Omit<Cliente, 'id'>) => {
+      console.log("Creando nuevo cliente:", newCliente);
       const { data, error } = await supabase
         .from('clientes')
         .insert(newCliente)
         .select()
         .single()
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error al crear cliente:", error);
+        throw error;
+      }
+      
+      console.log("Cliente creado:", data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] })
-      toast({
-        title: "Cliente creado",
-        description: "El cliente ha sido creado exitosamente.",
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo crear el cliente: ${error.message}`,
-        variant: "destructive",
-      })
     },
   })
 
   const updateCliente = useMutation({
     mutationFn: async ({ id, ...updateData }: Cliente) => {
+      console.log("Actualizando cliente:", id, updateData);
       const { data, error } = await supabase
         .from('clientes')
         .update(updateData)
@@ -75,43 +77,31 @@ export const useClientes = () => {
         .select()
         .single()
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error("Error al actualizar cliente:", error);
+        throw error;
+      }
+      
+      console.log("Cliente actualizado:", data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] })
-      toast({
-        title: "Cliente actualizado",
-        description: "El cliente ha sido actualizado exitosamente.",
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo actualizar el cliente: ${error.message}`,
-        variant: "destructive",
-      })
     },
   })
 
   const deleteCliente = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Eliminando cliente:", id);
       const { error } = await supabase.from('clientes').delete().eq('id', id)
-      if (error) throw error
+      if (error) {
+        console.error("Error al eliminar cliente:", error);
+        throw error;
+      }
+      console.log("Cliente eliminado con éxito");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] })
-      toast({
-        title: "Cliente eliminado",
-        description: "El cliente ha sido eliminado exitosamente.",
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `No se pudo eliminar el cliente: ${error.message}`,
-        variant: "destructive",
-      })
     },
   })
 

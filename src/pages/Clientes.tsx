@@ -29,17 +29,21 @@ const Clientes = () => {
     conservadores: 0
   });
 
+  // Función para manejar cambios en los inputs del formulario
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNuevoCliente(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'conservadores' ? Number(value) : value
     }));
   };
 
+  // Función para agregar un nuevo cliente
   const agregarCliente = () => {
+    console.log("Agregando cliente:", nuevoCliente);
     createCliente.mutate(nuevoCliente, {
       onSuccess: () => {
+        console.log("Cliente agregado con éxito");
         setIsDialogOpen(false);
         setNuevoCliente({
           nombre: '',
@@ -53,21 +57,41 @@ const Clientes = () => {
           title: "Cliente creado",
           description: "El cliente ha sido agregado exitosamente."
         });
-      }
-    });
-  };
-
-  const eliminarCliente = (id: string) => {
-    deleteCliente.mutate(id, {
-      onSuccess: () => {
+      },
+      onError: (error) => {
+        console.error("Error al agregar cliente:", error);
         toast({
-          title: "Cliente eliminado",
-          description: "El cliente ha sido eliminado exitosamente."
+          title: "Error",
+          description: "No se pudo agregar el cliente.",
+          variant: "destructive"
         });
       }
     });
   };
 
+  // Función para eliminar un cliente
+  const eliminarCliente = (id: string) => {
+    console.log("Eliminando cliente:", id);
+    deleteCliente.mutate(id, {
+      onSuccess: () => {
+        console.log("Cliente eliminado con éxito");
+        toast({
+          title: "Cliente eliminado",
+          description: "El cliente ha sido eliminado exitosamente."
+        });
+      },
+      onError: (error) => {
+        console.error("Error al eliminar cliente:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar el cliente.",
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
+  // Filtrar clientes según término de búsqueda
   const filteredClientes = isLoading 
     ? [] 
     : clientes?.filter((cliente) =>
@@ -77,6 +101,10 @@ const Clientes = () => {
             value.toLowerCase().includes(searchTerm.toLowerCase())
         )
       ) || [];
+
+  console.log("Estado de carga:", isLoading);
+  console.log("Clientes disponibles:", clientes);
+  console.log("Clientes filtrados:", filteredClientes);
 
   return (
     <div className="space-y-6">
@@ -135,7 +163,7 @@ const Clientes = () => {
                   id="email"
                   name="email"
                   type="email"
-                  value={nuevoCliente.email}
+                  value={nuevoCliente.email || ''}
                   onChange={handleInputChange}
                   className="col-span-3"
                 />
@@ -147,7 +175,7 @@ const Clientes = () => {
                 <Input
                   id="telefono"
                   name="telefono"
-                  value={nuevoCliente.telefono}
+                  value={nuevoCliente.telefono || ''}
                   onChange={handleInputChange}
                   className="col-span-3"
                 />
@@ -159,7 +187,7 @@ const Clientes = () => {
                 <Input
                   id="direccion"
                   name="direccion"
-                  value={nuevoCliente.direccion}
+                  value={nuevoCliente.direccion || ''}
                   onChange={handleInputChange}
                   className="col-span-3"
                 />
@@ -172,7 +200,7 @@ const Clientes = () => {
                   id="conservadores"
                   name="conservadores"
                   type="number"
-                  value={nuevoCliente.conservadores}
+                  value={nuevoCliente.conservadores || 0}
                   onChange={handleInputChange}
                   className="col-span-3"
                 />
@@ -194,7 +222,7 @@ const Clientes = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredClientes.length > 0 ? (
+          {filteredClientes && filteredClientes.length > 0 ? (
             filteredClientes.map((cliente) => (
               <Card key={cliente.id} className="overflow-hidden">
                 <CardHeader className="pb-2">
