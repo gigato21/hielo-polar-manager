@@ -1,7 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { Tables } from '@/types/supabase'
+
+// Define the conservador status type
+type ConservadorStatus = 'activo' | 'mantenimiento' | 'inactivo';
 
 export const useConservadores = () => {
   const queryClient = useQueryClient()
@@ -13,8 +15,8 @@ export const useConservadores = () => {
         .from('conservadores')
         .select(`
           *,
-          cliente:clientes(id, nombre),
-          ubicaciones(id, latitud, longitud, direccion, fecha_registro)
+          cliente:clientes(id, nombre, rfc, direccion_fiscal),
+          ubicaciones:ubicaciones_conservador(id, latitud, longitud, direccion, fecha_registro)
         `)
         .order('created_at', { ascending: false })
 
@@ -24,7 +26,15 @@ export const useConservadores = () => {
   })
 
   const createConservador = useMutation({
-    mutationFn: async (newConservador: Tables['conservadores']['Insert']) => {
+    mutationFn: async (newConservador: {
+      numero_serie: string;
+      modelo?: string | null;
+      capacidad?: number | null;
+      status?: ConservadorStatus;
+      cliente_id?: string | null;
+      notas?: string | null;
+      qr_code?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('conservadores')
         .insert(newConservador)
@@ -43,7 +53,16 @@ export const useConservadores = () => {
     mutationFn: async ({
       id,
       ...updateData
-    }: { id: string } & Tables['conservadores']['Update']) => {
+    }: {
+      id: string;
+      numero_serie?: string;
+      modelo?: string | null;
+      capacidad?: number | null;
+      status?: ConservadorStatus;
+      cliente_id?: string | null;
+      notas?: string | null;
+      qr_code?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('conservadores')
         .update(updateData)

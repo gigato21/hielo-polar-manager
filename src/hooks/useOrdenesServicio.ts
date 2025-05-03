@@ -1,6 +1,7 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { Tables } from '@/types/supabase'
+import { EstadoOrden, TipoServicio } from '@/types/supabase'
 
 export const useOrdenesServicio = (conservadorId?: string) => {
   const queryClient = useQueryClient()
@@ -55,7 +56,24 @@ export const useOrdenesServicio = (conservadorId?: string) => {
   })
 
   const createOrdenServicio = useMutation({
-    mutationFn: async (newOrden: Tables['ordenes_servicio']['Insert']) => {
+    mutationFn: async (newOrden: {
+      conservador_id: string;
+      proveedor_id: string;
+      estado?: EstadoOrden;
+      tipo: TipoServicio;
+      fecha_solicitud: string;
+      fecha_programada?: string | null;
+      fecha_inicio?: string | null;
+      fecha_fin?: string | null;
+      costo_materiales?: number | null;
+      costo_mano_obra?: number | null;
+      costo_total?: number | null;
+      trabajo_realizado?: string | null;
+      materiales_utilizados?: string | null;
+      descripcion_problema?: string | null;
+      diagnostico?: string | null;
+      [key: string]: any;
+    }) => {
       // Generar número de orden único
       const fecha = new Date()
       const año = fecha.getFullYear()
@@ -87,7 +105,31 @@ export const useOrdenesServicio = (conservadorId?: string) => {
     mutationFn: async ({
       id,
       ...updateData
-    }: { id: string } & Tables['ordenes_servicio']['Update']) => {
+    }: { 
+      id: string;
+      conservador_id?: string;
+      proveedor_id?: string;
+      estado?: EstadoOrden;
+      tipo?: TipoServicio;
+      fecha_solicitud?: string;
+      fecha_programada?: string | null;
+      fecha_inicio?: string | null;
+      fecha_fin?: string | null;
+      costo_materiales?: number | null;
+      costo_mano_obra?: number | null;
+      costo_total?: number | null;
+      fecha_factura?: string | null;
+      trabajo_realizado?: string | null;
+      materiales_utilizados?: string | null;
+      uuid_factura?: string | null;
+      pdf_factura_url?: string | null;
+      xml_factura_url?: string | null;
+      numero_factura?: string | null;
+      notas_internas?: string | null;
+      descripcion_problema?: string | null;
+      diagnostico?: string | null;
+      [key: string]: any;
+    }) => {
       const { data, error } = await supabase
         .from('ordenes_servicio')
         .update(updateData)
@@ -115,7 +157,12 @@ export const useOrdenesServicio = (conservadorId?: string) => {
 
   // Función para agregar evidencias
   const addEvidencia = useMutation({
-    mutationFn: async (evidencia: Tables['evidencias_servicio']['Insert']) => {
+    mutationFn: async (evidencia: {
+      orden_servicio_id: string;
+      tipo: string;
+      url: string;
+      descripcion?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('evidencias_servicio')
         .insert(evidencia)
@@ -132,7 +179,13 @@ export const useOrdenesServicio = (conservadorId?: string) => {
 
   // Función para agregar firma de conformidad
   const addFirma = useMutation({
-    mutationFn: async (firma: Tables['firmas_conformidad']['Insert']) => {
+    mutationFn: async (firma: {
+      orden_servicio_id: string;
+      nombre_firmante: string;
+      cargo_firmante?: string | null;
+      firma_url: string;
+      fecha_firma: string;
+    }) => {
       const { data, error } = await supabase
         .from('firmas_conformidad')
         .insert(firma)

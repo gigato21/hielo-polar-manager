@@ -1,7 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { Tables } from '@/types/supabase'
+
+// Define the mantenimiento status type
+type MantenimientoStatus = 'pendiente' | 'en_proceso' | 'completado' | 'cancelado';
 
 export const useMantenimientos = (conservadorId?: string) => {
   const queryClient = useQueryClient()
@@ -13,9 +15,13 @@ export const useMantenimientos = (conservadorId?: string) => {
         .from('mantenimientos')
         .select(`
           *,
-          conservador:conservadores(id, numero_serie, modelo)
+          conservador:conservadores(
+            id,
+            numero_serie,
+            modelo
+          )
         `)
-        .order('fecha_programada', { ascending: true })
+        .order('fecha_programada', { ascending: false })
 
       if (conservadorId) {
         query = query.eq('conservador_id', conservadorId)
@@ -29,7 +35,17 @@ export const useMantenimientos = (conservadorId?: string) => {
   })
 
   const createMantenimiento = useMutation({
-    mutationFn: async (newMantenimiento: Tables['mantenimientos']['Insert']) => {
+    mutationFn: async (newMantenimiento: {
+      conservador_id?: string | null;
+      tipo_servicio: string;
+      fecha_programada?: string | null;
+      fecha_realizado?: string | null;
+      costo?: number | null;
+      status?: MantenimientoStatus;
+      tecnico?: string | null;
+      notas?: string | null;
+      descripcion?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('mantenimientos')
         .insert(newMantenimiento)
@@ -48,7 +64,18 @@ export const useMantenimientos = (conservadorId?: string) => {
     mutationFn: async ({
       id,
       ...updateData
-    }: { id: string } & Tables['mantenimientos']['Update']) => {
+    }: { 
+      id: string;
+      conservador_id?: string | null;
+      tipo_servicio?: string;
+      fecha_programada?: string | null;
+      fecha_realizado?: string | null;
+      costo?: number | null;
+      status?: MantenimientoStatus;
+      tecnico?: string | null;
+      notas?: string | null;
+      descripcion?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('mantenimientos')
         .update(updateData)
