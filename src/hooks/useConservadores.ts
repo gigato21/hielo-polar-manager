@@ -1,6 +1,7 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import type { Tables } from '@/integrations/supabase/types'
+import { Tables } from '@/types/supabase'
 
 export const useConservadores = () => {
   const queryClient = useQueryClient()
@@ -75,4 +76,4 @@ export const useConservadores = () => {
     updateConservador,
     deleteConservador,
   }
-} 
+}

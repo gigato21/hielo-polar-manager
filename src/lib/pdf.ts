@@ -2,9 +2,9 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { Tables } from '@/integrations/supabase/types'
+import { Tables } from '@/types/supabase'
 
-type ConservadorWithDetails = Tables['conservadores'] & {
+type ConservadorWithDetails = Tables['conservadores']['Row'] & {
   cliente?: {
     id: string
     nombre: string
@@ -18,7 +18,7 @@ type ConservadorWithDetails = Tables['conservadores'] & {
   }[]
 }
 
-type MantenimientoWithDetails = Tables['mantenimientos'] & {
+type MantenimientoWithDetails = Tables['mantenimientos']['Row'] & {
   conservador?: {
     id: string
     numero_serie: string
@@ -169,4 +169,4 @@ export const generateMantenimientosReport = (mantenimientos: MantenimientoWithDe
   }
 
   return doc
-} 
+}

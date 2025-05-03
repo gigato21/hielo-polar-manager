@@ -15,5 +15,31 @@ export type EstadoOrden =
   | 'cancelada'
   | 'facturada';
 
-// Define Tables type to fix the "Tables requires between 1 and 2 type arguments" error
-export type Tables<T = any> = T;
+// Define Tables type properly to fix the "Tables requires between 1 and 2 type arguments" error
+export interface Tables {
+  clientes: {
+    Row: any;
+    Insert: any;
+    Update: any;
+  };
+  conservadores: {
+    Row: any;
+    Insert: any;
+    Update: any;
+  };
+  mantenimientos: {
+    Row: any;
+    Insert: any;
+    Update: any;
+  };
+  proveedores_servicio: {
+    Row: any;
+    Insert: any;
+    Update: any;
+  };
+  ordenes_servicio: {
+    Row: any;
+    Insert: any;
+    Update: any;
+  };
+}

@@ -29,7 +29,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import type { Tables, TipoServicio } from '@/integrations/supabase/types'
+import type { Tables, TipoServicio, EstadoOrden } from '@/types/supabase'
 import { useConservadores } from '@/hooks/useConservadores'
 import { useProveedoresServicio } from '@/hooks/useProveedoresServicio'
 
@@ -528,4 +528,4 @@ export function OrdenServicioForm({ orden, onSubmit, isLoading }: OrdenServicioF
       </form>
     </Form>
   )
-} 
+}

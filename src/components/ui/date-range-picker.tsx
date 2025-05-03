@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/popover"
 
 export interface DatePickerWithRangeProps {
-  date: DateRange
-  setDate?: React.Dispatch<React.SetStateAction<DateRange>>
-  className?: string
+  date: DateRange | undefined;
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  className?: string;
 }
 
 export function DatePickerWithRange({
@@ -59,6 +59,7 @@ export function DatePickerWithRange({
             selected={date}
             onSelect={setDate}
             numberOfMonths={2}
+            className="pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
