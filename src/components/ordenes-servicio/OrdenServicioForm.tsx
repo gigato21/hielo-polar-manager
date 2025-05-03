@@ -29,7 +29,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import type { Tables, TipoServicio, EstadoOrden } from '@/types/supabase'
+import { TipoServicio, EstadoOrden, Tables } from '@/types/supabase'
 import { useConservadores } from '@/hooks/useConservadores'
 import { useProveedoresServicio } from '@/hooks/useProveedoresServicio'
 
@@ -56,10 +56,12 @@ const ordenServicioSchema = z.object({
 
 type OrdenServicioFormValues = z.infer<typeof ordenServicioSchema>
 
-interface OrdenServicioFormProps {
-  orden?: Tables['ordenes_servicio']
-  onSubmit: (data: OrdenServicioFormValues) => void
-  isLoading?: boolean
+export interface OrdenServicioFormProps {
+  orden?: Tables['ordenes_servicio']['Row'];
+  onSubmit: (data: OrdenServicioFormValues) => void;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
 const tiposServicio: { value: TipoServicio; label: string }[] = [
@@ -92,7 +94,7 @@ const usosCFDI = [
   { value: 'I05', label: 'I05 - Dados, troqueles, moldes, matrices y herramental' },
 ]
 
-export function OrdenServicioForm({ orden, onSubmit, isLoading }: OrdenServicioFormProps) {
+export function OrdenServicioForm({ orden, onSubmit, onSuccess, onCancel, isLoading }: OrdenServicioFormProps) {
   const { conservadores } = useConservadores()
   const { proveedores } = useProveedoresServicio()
 
@@ -110,6 +112,13 @@ export function OrdenServicioForm({ orden, onSubmit, isLoading }: OrdenServicioF
       },
   })
 
+  const handleFormSubmit = (data: OrdenServicioFormValues) => {
+    onSubmit(data);
+    if (onSuccess) {
+      onSuccess();
+    }
+  };
+
   const handleFileUpload = (field: keyof OrdenServicioFormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files?.length) {
@@ -119,7 +128,7 @@ export function OrdenServicioForm({ orden, onSubmit, isLoading }: OrdenServicioF
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-6">
             <FormField
@@ -522,9 +531,16 @@ export function OrdenServicioForm({ orden, onSubmit, isLoading }: OrdenServicioF
           </div>
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : orden ? 'Actualizar Orden' : 'Crear Orden'}
-        </Button>
+        <div className="flex gap-3 justify-end">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Guardando...' : orden ? 'Actualizar Orden' : 'Crear Orden'}
+          </Button>
+        </div>
       </form>
     </Form>
   )

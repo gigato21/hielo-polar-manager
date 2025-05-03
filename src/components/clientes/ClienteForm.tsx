@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { Tables } from '@/integrations/supabase/types'
+import { Tables } from '@/types/supabase'
 
 const clienteSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
@@ -45,9 +45,9 @@ const clienteSchema = z.object({
 type ClienteFormValues = z.infer<typeof clienteSchema>
 
 interface ClienteFormProps {
-  cliente?: Tables['clientes']
-  onSubmit: (data: ClienteFormValues) => void
-  isLoading?: boolean
+  cliente?: Tables['clientes']['Row'];
+  onSubmit: (data: ClienteFormValues) => void;
+  isLoading?: boolean;
 }
 
 export function ClienteForm({ cliente, onSubmit, isLoading }: ClienteFormProps) {
@@ -297,4 +297,4 @@ export function ClienteForm({ cliente, onSubmit, isLoading }: ClienteFormProps) 
       </form>
     </Form>
   )
-} 
+}

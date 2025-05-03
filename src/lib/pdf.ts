@@ -4,6 +4,13 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Tables } from '@/types/supabase'
 
+// Define a more specific type for jsPDF docs that we know have been processed by autoTable
+interface ExtendedJsPDF extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
+
 type ConservadorWithDetails = Tables['conservadores']['Row'] & {
   cliente?: {
     id: string
@@ -27,7 +34,7 @@ type MantenimientoWithDetails = Tables['mantenimientos']['Row'] & {
 }
 
 export const generateConservadorReport = (conservador: ConservadorWithDetails) => {
-  const doc = new jsPDF()
+  const doc = new jsPDF() as ExtendedJsPDF;
 
   // Title
   doc.setFontSize(20)
@@ -79,7 +86,7 @@ export const generateConservadorReport = (conservador: ConservadorWithDetails) =
   }
 
   // Footer
-  const pageCount = doc.internal.getNumberOfPages()
+  const pageCount = doc.getNumberOfPages();
   doc.setFontSize(10)
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i)
@@ -100,7 +107,7 @@ export const generateConservadorReport = (conservador: ConservadorWithDetails) =
 }
 
 export const generateMantenimientosReport = (mantenimientos: MantenimientoWithDetails[]) => {
-  const doc = new jsPDF()
+  const doc = new jsPDF() as ExtendedJsPDF;
 
   // Title
   doc.setFontSize(20)
@@ -151,7 +158,7 @@ export const generateMantenimientosReport = (mantenimientos: MantenimientoWithDe
   })
 
   // Footer
-  const pageCount = doc.internal.getNumberOfPages()
+  const pageCount = doc.getNumberOfPages();
   doc.setFontSize(10)
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i)

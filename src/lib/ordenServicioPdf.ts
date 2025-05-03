@@ -1,14 +1,8 @@
-
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EstadoOrden, TipoServicio } from '@/types/supabase'
-
-// Remove the problematic interface and plugin setup
-// and just use jsPDF directly
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 interface OrdenServicioWithDetails {
   id: string;

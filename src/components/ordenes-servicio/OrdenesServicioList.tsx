@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
 import { OrdenServicioForm } from "@/components/ordenes-servicio/OrdenServicioForm"
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { TipoServicio, EstadoOrden, Tables } from '@/types/supabase'
+import { TipoServicio, EstadoOrden } from '@/types/supabase'
 
 interface OrdenServicio {
   id: string
@@ -255,6 +255,10 @@ export function OrdenesServicioList() {
             </DialogDescription>
           </DialogHeader>
           <OrdenServicioForm
+            onSubmit={(data) => {
+              console.log("Form submitted:", data);
+              setIsDialogOpen(false);
+            }}
             onSuccess={() => setIsDialogOpen(false)}
             onCancel={() => setIsDialogOpen(false)}
           />
