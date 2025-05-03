@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +10,7 @@ import Clientes from './pages/Clientes';    // Cambiado a default import
 import Conservadores from './pages/Conservadores';
 import { MantenimientoPage } from './pages/Mantenimiento';
 import { Reportes } from './pages/Reportes';
-import QRCode from './pages/QRCode';
+import QRCode from './pages/QRCode.tsx';  // Fixed import path by adding .tsx extension
 import { EstadisticasPage } from './pages/Estadisticas';
 import Configuracion from './pages/Configuracion';
 

@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       clientes: {
         Row: {
+          contacto: string | null
           created_at: string
           direccion: string | null
           email: string | null
@@ -21,6 +22,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contacto?: string | null
           created_at?: string
           direccion?: string | null
           email?: string | null
@@ -31,6 +33,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contacto?: string | null
           created_at?: string
           direccion?: string | null
           email?: string | null
