@@ -97,7 +97,7 @@ export const ClientesList = ({
                   )}
                   <div className="flex items-center text-sm">
                     <Package className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>{cliente.conservadores || 0} conservadores</span>
+                    <span>{cliente.conservadores || '0'} conservadores</span>
                   </div>
                 </CardContent>
               </Card>

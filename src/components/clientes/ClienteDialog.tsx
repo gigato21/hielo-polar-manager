@@ -30,7 +30,7 @@ export const ClienteDialog = ({
     email: '',
     telefono: '',
     direccion: '',
-    conservadores: 0
+    conservadores: '0'  // Changed from number to string
   });
 
   // Función para manejar cambios en los inputs del formulario
@@ -38,7 +38,7 @@ export const ClienteDialog = ({
     const { name, value } = e.target;
     setNuevoCliente(prev => ({
       ...prev,
-      [name]: name === 'conservadores' ? Number(value) : value
+      [name]: value
     }));
   };
 
@@ -51,7 +51,7 @@ export const ClienteDialog = ({
       email: '',
       telefono: '',
       direccion: '',
-      conservadores: 0
+      conservadores: '0'  // Changed from number to string
     });
   };
 
@@ -136,8 +136,8 @@ export const ClienteDialog = ({
             <Input
               id="conservadores"
               name="conservadores"
-              type="number"
-              value={nuevoCliente.conservadores || 0}
+              type="text"  // Changed from number to text
+              value={nuevoCliente.conservadores || '0'}
               onChange={handleInputChange}
               className="col-span-3"
             />

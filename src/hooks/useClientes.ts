@@ -10,7 +10,7 @@ export interface Cliente {
   email?: string
   telefono?: string
   direccion?: string
-  conservadores?: number
+  conservadores?: string  // Changed from number to string to match Supabase schema
 }
 
 export const useClientes = () => {
@@ -36,7 +36,8 @@ export const useClientes = () => {
         
         return data.map(cliente => ({
           ...cliente,
-          conservadores: cliente.conservadores?.length || 0
+          // Convert conservadores array length to string to maintain type consistency
+          conservadores: cliente.conservadores?.length?.toString() || "0"
         })) || [];
       } catch (error) {
         console.error("Error fetching clientes:", error);
@@ -48,9 +49,17 @@ export const useClientes = () => {
   const createCliente = useMutation({
     mutationFn: async (newCliente: Omit<Cliente, 'id'>) => {
       console.log("Creando nuevo cliente:", newCliente);
+      // Make sure conservadores is a string when sending to Supabase
+      const clienteToInsert = {
+        ...newCliente,
+        conservadores: typeof newCliente.conservadores === 'number' 
+          ? newCliente.conservadores.toString() 
+          : newCliente.conservadores
+      };
+      
       const { data, error } = await supabase
         .from('clientes')
-        .insert(newCliente)
+        .insert(clienteToInsert)
         .select()
         .single()
 
@@ -70,9 +79,17 @@ export const useClientes = () => {
   const updateCliente = useMutation({
     mutationFn: async ({ id, ...updateData }: Cliente) => {
       console.log("Actualizando cliente:", id, updateData);
+      // Make sure conservadores is a string when sending to Supabase
+      const clienteToUpdate = {
+        ...updateData,
+        conservadores: typeof updateData.conservadores === 'number' 
+          ? updateData.conservadores.toString() 
+          : updateData.conservadores
+      };
+      
       const { data, error } = await supabase
         .from('clientes')
-        .update(updateData)
+        .update(clienteToUpdate)
         .eq('id', id)
         .select()
         .single()
