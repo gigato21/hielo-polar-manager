@@ -1,11 +1,8 @@
-// filepath: c:\Users\oviey\Documents\hielo-polar-manager\src\lib\supabaseClient.ts
+
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || "";
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Supabase URL o Key no están configurados en las variables de entorno.");
-}
+// Use hardcoded values instead of environment variables
+const supabaseUrl = "https://qnwetrelqkusmoazszym.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFud2V0cmVscWt1c21vYXpzenltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxNTY2ODcsImV4cCI6MjA2MTczMjY4N30.ygHXHSjEZtDTm3dhBXXn4ftuhSWAFQiD5M12lzeYZPY";
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
