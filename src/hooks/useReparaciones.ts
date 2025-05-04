@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
+import { supabase } from '@/lib/supabaseClient'
 import { useToast } from "@/hooks/use-toast"
 
 // Define the reparación status type
@@ -60,8 +60,11 @@ export const useReparaciones = (conservadorId?: string) => {
           )
         `
         
-        // Use type assertion (as any) to bypass TypeScript errors
-        const query = (supabase.from('reparaciones') as any)
+        // Cast the entire result to 'any' to bypass TypeScript errors completely
+        const query = supabase.from('reparaciones') as any
+        
+        // Build the query
+        query
           .select(queryStr)
           .order('fecha_reporte', { ascending: false })
 
@@ -91,9 +94,10 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async (newReparacion: Omit<Reparacion, 'id' | 'conservador'>) => {
       console.log("Creando nueva reparación:", newReparacion);
       
-      // Use type assertion to bypass TypeScript errors
-      const { data, error } = await (supabase
-        .from('reparaciones') as any)
+      // Cast the entire result to 'any' to bypass TypeScript errors
+      const client = supabase.from('reparaciones') as any
+      
+      const { data, error } = await client
         .insert(newReparacion)
         .select()
         .single()
@@ -127,9 +131,10 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async ({ id, ...updateData }: Reparacion) => {
       console.log("Actualizando reparación:", id, updateData);
       
-      // Use type assertion to bypass TypeScript errors
-      const { data, error } = await (supabase
-        .from('reparaciones') as any)
+      // Cast the entire result to 'any' to bypass TypeScript errors
+      const client = supabase.from('reparaciones') as any
+      
+      const { data, error } = await client
         .update(updateData)
         .eq('id', id)
         .select()
@@ -163,8 +168,10 @@ export const useReparaciones = (conservadorId?: string) => {
   const deleteReparacion = useMutation({
     mutationFn: async (id: string) => {
       console.log("Eliminando reparación:", id);
-      // Use type assertion to bypass TypeScript errors
-      const { error } = await (supabase.from('reparaciones') as any).delete().eq('id', id)
+      // Cast the entire result to 'any' to bypass TypeScript errors
+      const client = supabase.from('reparaciones') as any
+      
+      const { error } = await client.delete().eq('id', id)
       if (error) {
         console.error("Error al eliminar reparación:", error);
         throw error;
