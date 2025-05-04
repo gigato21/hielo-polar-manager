@@ -37,7 +37,7 @@ export const useReparaciones = (conservadorId?: string) => {
     queryFn: async () => {
       console.log("Ejecutando queryFn para obtener reparaciones");
       try {
-        // Use the client without type checking for the table
+        // Use a type assertion to bypass TypeScript checking for the table
         let queryStr = `
           id,
           conservador_id,
@@ -60,11 +60,13 @@ export const useReparaciones = (conservadorId?: string) => {
           )
         `
         
-        let query = supabase.from('reparaciones').select(queryStr)
+        // Use type assertion (as any) to bypass TypeScript errors
+        const query = (supabase.from('reparaciones') as any)
+          .select(queryStr)
           .order('fecha_reporte', { ascending: false })
 
         if (conservadorId) {
-          query = query.eq('conservador_id', conservadorId)
+          query.eq('conservador_id', conservadorId)
         }
 
         const { data, error } = await query
@@ -75,10 +77,11 @@ export const useReparaciones = (conservadorId?: string) => {
         }
         
         console.log("Datos obtenidos de Supabase:", data);
+        // Explicitly type the return value to match our Reparacion interface
         return data as Reparacion[] || []
       } catch (error) {
         console.error("Error fetching reparaciones:", error);
-        return [];
+        return [] as Reparacion[];
       }
     },
     enabled: !conservadorId || typeof conservadorId === 'string',
@@ -88,8 +91,9 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async (newReparacion: Omit<Reparacion, 'id' | 'conservador'>) => {
       console.log("Creando nueva reparación:", newReparacion);
       
-      const { data, error } = await supabase
-        .from('reparaciones')
+      // Use type assertion to bypass TypeScript errors
+      const { data, error } = await (supabase
+        .from('reparaciones') as any)
         .insert(newReparacion)
         .select()
         .single()
@@ -100,6 +104,7 @@ export const useReparaciones = (conservadorId?: string) => {
       }
       
       console.log("Reparación creada:", data);
+      // Explicitly type the return value
       return data as Reparacion;
     },
     onSuccess: () => {
@@ -122,8 +127,9 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async ({ id, ...updateData }: Reparacion) => {
       console.log("Actualizando reparación:", id, updateData);
       
-      const { data, error } = await supabase
-        .from('reparaciones')
+      // Use type assertion to bypass TypeScript errors
+      const { data, error } = await (supabase
+        .from('reparaciones') as any)
         .update(updateData)
         .eq('id', id)
         .select()
@@ -135,6 +141,7 @@ export const useReparaciones = (conservadorId?: string) => {
       }
       
       console.log("Reparación actualizada:", data);
+      // Explicitly type the return value
       return data as Reparacion;
     },
     onSuccess: () => {
@@ -156,7 +163,8 @@ export const useReparaciones = (conservadorId?: string) => {
   const deleteReparacion = useMutation({
     mutationFn: async (id: string) => {
       console.log("Eliminando reparación:", id);
-      const { error } = await supabase.from('reparaciones').delete().eq('id', id)
+      // Use type assertion to bypass TypeScript errors
+      const { error } = await (supabase.from('reparaciones') as any).delete().eq('id', id)
       if (error) {
         console.error("Error al eliminar reparación:", error);
         throw error;
