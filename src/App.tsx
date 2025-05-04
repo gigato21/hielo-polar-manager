@@ -14,6 +14,7 @@ import QRCode from './pages/QRCode';
 import { EstadisticasPage } from './pages/Estadisticas'; 
 import Configuracion from './pages/Configuracion';
 import { OrdenesServicioPage } from './pages/OrdenesServicio';
+import Reparaciones from './pages/Reparaciones'; // Import the new page
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/conservadores" element={<Conservadores />} />
             <Route path="/mantenimiento" element={<MantenimientoPage />} />
             <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
+            <Route path="/reparaciones" element={<Reparaciones />} /> {/* Add the new route */}
             <Route path="/reportes" element={<Reportes />} />
             <Route path="/configuracion" element={<Configuracion />} />
             <Route path="/qr" element={<QRCode />} />

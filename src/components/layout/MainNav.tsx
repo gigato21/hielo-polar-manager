@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
@@ -9,6 +10,7 @@ import {
   Snowflake,
   Wrench,
   FileText,
+  Tool
 } from 'lucide-react'
 
 export function MainNav() {
@@ -39,6 +41,11 @@ export function MainNav() {
       href: '/mantenimiento',
       label: 'Mantenimiento',
       icon: Wrench,
+    },
+    {
+      href: '/reparaciones',
+      label: 'Reparaciones',
+      icon: Tool,
     },
     {
       href: '/reportes',
