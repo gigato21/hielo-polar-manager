@@ -1,4 +1,3 @@
-
 export type TipoServicio = 
   | 'mantenimiento_preventivo'
   | 'mantenimiento_correctivo'
@@ -14,6 +13,12 @@ export type EstadoOrden =
   | 'completada'
   | 'cancelada'
   | 'facturada';
+
+export type ReparacionStatus = 
+  | 'pendiente'
+  | 'en_proceso'
+  | 'completada'
+  | 'cancelada';
 
 // Define specific row types for tables
 export interface Tables {
@@ -292,6 +297,46 @@ export interface Tables {
       cargo_firmante?: string | null;
       firma_url?: string;
       fecha_firma?: string;
+    };
+  };
+  
+  reparaciones: {
+    Row: {
+      id: string;
+      conservador_id: string;
+      descripcion_problema: string;
+      fecha_reporte: string;
+      fecha_reparacion?: string | null;
+      costo?: number | null;
+      repuestos_utilizados?: string | null;
+      tecnico?: string | null;
+      status: ReparacionStatus;
+      notas?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Insert: {
+      id?: string;
+      conservador_id: string;
+      descripcion_problema: string;
+      fecha_reporte: string;
+      fecha_reparacion?: string | null;
+      costo?: number | null;
+      repuestos_utilizados?: string | null;
+      tecnico?: string | null;
+      status: ReparacionStatus;
+      notas?: string | null;
+    };
+    Update: {
+      conservador_id?: string;
+      descripcion_problema?: string;
+      fecha_reporte?: string;
+      fecha_reparacion?: string | null;
+      costo?: number | null;
+      repuestos_utilizados?: string | null;
+      tecnico?: string | null;
+      status?: ReparacionStatus;
+      notas?: string | null;
     };
   };
 }

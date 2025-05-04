@@ -40,12 +40,21 @@ export const useReparaciones = (conservadorId?: string) => {
         let query = supabase
           .from('reparaciones')
           .select(`
-            *,
-            conservador:conservadores(
+            id,
+            conservador_id,
+            descripcion_problema,
+            fecha_reporte,
+            fecha_reparacion,
+            costo,
+            repuestos_utilizados,
+            tecnico,
+            status,
+            notas,
+            conservador:conservador_id(
               id,
               numero_serie,
               modelo,
-              cliente:clientes(
+              cliente:cliente_id(
                 id,
                 nombre
               )
