@@ -37,12 +37,8 @@ export const useReparaciones = (conservadorId?: string) => {
     queryFn: async () => {
       console.log("Ejecutando queryFn para obtener reparaciones");
       try {
-        // Use any to bypass TypeScript strict checking for the table name
-        // since Supabase types don't include the reparaciones table yet
-        const query = supabase
-          .from('reparaciones') as any
-          
-        let queryBuilder = query.select(`
+        // Use the client without type checking for the table
+        let queryStr = `
           id,
           conservador_id,
           descripcion_problema,
@@ -62,14 +58,16 @@ export const useReparaciones = (conservadorId?: string) => {
               nombre
             )
           )
-        `)
-        .order('fecha_reporte', { ascending: false })
+        `
+        
+        let query = supabase.from('reparaciones').select(queryStr)
+          .order('fecha_reporte', { ascending: false })
 
         if (conservadorId) {
-          queryBuilder = queryBuilder.eq('conservador_id', conservadorId)
+          query = query.eq('conservador_id', conservadorId)
         }
 
-        const { data, error } = await queryBuilder
+        const { data, error } = await query
         
         if (error) {
           console.error("Error en la consulta:", error);
@@ -90,8 +88,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async (newReparacion: Omit<Reparacion, 'id' | 'conservador'>) => {
       console.log("Creando nueva reparación:", newReparacion);
       
-      const { data, error } = await (supabase
-        .from('reparaciones') as any)
+      const { data, error } = await supabase
+        .from('reparaciones')
         .insert(newReparacion)
         .select()
         .single()
@@ -124,8 +122,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async ({ id, ...updateData }: Reparacion) => {
       console.log("Actualizando reparación:", id, updateData);
       
-      const { data, error } = await (supabase
-        .from('reparaciones') as any)
+      const { data, error } = await supabase
+        .from('reparaciones')
         .update(updateData)
         .eq('id', id)
         .select()
@@ -158,7 +156,7 @@ export const useReparaciones = (conservadorId?: string) => {
   const deleteReparacion = useMutation({
     mutationFn: async (id: string) => {
       console.log("Eliminando reparación:", id);
-      const { error } = await (supabase.from('reparaciones') as any).delete().eq('id', id)
+      const { error } = await supabase.from('reparaciones').delete().eq('id', id)
       if (error) {
         console.error("Error al eliminar reparación:", error);
         throw error;
