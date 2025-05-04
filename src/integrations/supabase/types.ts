@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       clientes: {
         Row: {
+          conservadores: string | null
           contacto: string | null
           created_at: string
           direccion: string | null
@@ -22,6 +23,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          conservadores?: string | null
           contacto?: string | null
           created_at?: string
           direccion?: string | null
@@ -33,6 +35,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          conservadores?: string | null
           contacto?: string | null
           created_at?: string
           direccion?: string | null
