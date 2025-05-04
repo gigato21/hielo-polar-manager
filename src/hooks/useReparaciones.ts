@@ -60,8 +60,8 @@ export const useReparaciones = (conservadorId?: string) => {
           )
         `
         
-        // Cast the entire result to 'any' to bypass TypeScript errors completely
-        const query = supabase.from('reparaciones') as any
+        // Cast the entire supabase instance to 'any' to bypass TypeScript errors
+        const query = (supabase as any).from('reparaciones')
         
         // Build the query
         query
@@ -94,8 +94,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async (newReparacion: Omit<Reparacion, 'id' | 'conservador'>) => {
       console.log("Creando nueva reparación:", newReparacion);
       
-      // Cast the entire result to 'any' to bypass TypeScript errors
-      const client = supabase.from('reparaciones') as any
+      // Cast the entire supabase instance to 'any' to bypass TypeScript errors
+      const client = (supabase as any).from('reparaciones')
       
       const { data, error } = await client
         .insert(newReparacion)
@@ -131,8 +131,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async ({ id, ...updateData }: Reparacion) => {
       console.log("Actualizando reparación:", id, updateData);
       
-      // Cast the entire result to 'any' to bypass TypeScript errors
-      const client = supabase.from('reparaciones') as any
+      // Cast the entire supabase instance to 'any' to bypass TypeScript errors
+      const client = (supabase as any).from('reparaciones')
       
       const { data, error } = await client
         .update(updateData)
@@ -168,8 +168,8 @@ export const useReparaciones = (conservadorId?: string) => {
   const deleteReparacion = useMutation({
     mutationFn: async (id: string) => {
       console.log("Eliminando reparación:", id);
-      // Cast the entire result to 'any' to bypass TypeScript errors
-      const client = supabase.from('reparaciones') as any
+      // Cast the entire supabase instance to 'any' to bypass TypeScript errors
+      const client = (supabase as any).from('reparaciones')
       
       const { error } = await client.delete().eq('id', id)
       if (error) {
