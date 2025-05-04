@@ -52,9 +52,8 @@ export const useClientes = () => {
       // Make sure conservadores is a string when sending to Supabase
       const clienteToInsert = {
         ...newCliente,
-        conservadores: typeof newCliente.conservadores === 'number' 
-          ? newCliente.conservadores.toString() 
-          : newCliente.conservadores
+        // Fixed: Safe type conversion ensuring we have a string
+        conservadores: newCliente.conservadores || "0"
       };
       
       const { data, error } = await supabase
@@ -82,9 +81,8 @@ export const useClientes = () => {
       // Make sure conservadores is a string when sending to Supabase
       const clienteToUpdate = {
         ...updateData,
-        conservadores: typeof updateData.conservadores === 'number' 
-          ? updateData.conservadores.toString() 
-          : updateData.conservadores
+        // Fixed: Safe type conversion ensuring we have a string
+        conservadores: updateData.conservadores || "0"
       };
       
       const { data, error } = await supabase
