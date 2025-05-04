@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConservadorForm } from "@/components/conservadores/ConservadorForm";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ConservadorData {
   id: string;
@@ -17,8 +19,53 @@ interface ConservadorData {
   ultimoMantenimiento: string;
 }
 
+// Datos de muestra para desarrollo
 const conservadorData: ConservadorData[] = [
-  // ... (tus datos existentes de conservadores)
+  {
+    id: "CON-001",
+    modelo: "Frigidaire FC-450",
+    capacidad: "450 L",
+    cliente: "Restaurante El Rincón",
+    ubicacion: "Av. Insurgentes Sur 1234, Ciudad de México",
+    estado: "activo",
+    ultimoMantenimiento: "2025-03-15"
+  },
+  {
+    id: "CON-002",
+    modelo: "Whirlpool WP-320",
+    capacidad: "320 L",
+    cliente: "Tienda Local La Esquina",
+    ubicacion: "Calle Reforma 567, Guadalajara",
+    estado: "mantenimiento",
+    ultimoMantenimiento: "2025-04-10"
+  },
+  {
+    id: "CON-003",
+    modelo: "Samsung CF-500",
+    capacidad: "500 L",
+    cliente: "Supermercado Express",
+    ubicacion: "Blvd. Costero 789, Cancún",
+    estado: "inactivo",
+    ultimoMantenimiento: "2025-02-20"
+  },
+  {
+    id: "CON-004",
+    modelo: "LG Commercial 600",
+    capacidad: "600 L",
+    cliente: "Hotel Playa Azul",
+    ubicacion: "Av. Marina 456, Puerto Vallarta",
+    estado: "activo",
+    ultimoMantenimiento: "2025-04-25"
+  },
+  {
+    id: "CON-005",
+    modelo: "Daewoo DF-280",
+    capacidad: "280 L",
+    cliente: "Farmacia Central",
+    ubicacion: "Calle Principal 123, Monterrey",
+    estado: "activo",
+    ultimoMantenimiento: "2025-03-28"
+  }
 ];
 
 const Conservadores = () => {
@@ -26,9 +73,10 @@ const Conservadores = () => {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Filtrar conservadores por términos de búsqueda y estado
   const filteredConservadores = conservadorData.filter((conservador) => {
     const matchesSearch =
-      conservador.id.includes(searchTerm) ||
+      conservador.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conservador.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conservador.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conservador.ubicacion.toLowerCase().includes(searchTerm.toLowerCase());
@@ -73,7 +121,6 @@ const Conservadores = () => {
             <SlidersHorizontal className="h-4 w-4" />
           </Button>
           
-          {/* Botón para agregar nuevo conservador */}
           <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" />
             Nuevo
@@ -102,10 +149,12 @@ const Conservadores = () => {
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>Agregar Nuevo Conservador</DialogTitle>
           </DialogHeader>
-          <ConservadorForm 
-            onSuccess={() => setIsDialogOpen(false)}
-            onCancel={() => setIsDialogOpen(false)}
-          />
+          <ScrollArea className="max-h-[80vh]">
+            <ConservadorForm 
+              onSuccess={() => setIsDialogOpen(false)}
+              onCancel={() => setIsDialogOpen(false)}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
