@@ -98,8 +98,8 @@ const Conservadores = () => {
 
       {/* Modal para agregar nuevo conservador */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[600px] p-0">
+          <DialogHeader className="p-6 pb-0">
             <DialogTitle>Agregar Nuevo Conservador</DialogTitle>
           </DialogHeader>
           <ConservadorForm 
