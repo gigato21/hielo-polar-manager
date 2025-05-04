@@ -37,36 +37,39 @@ export const useReparaciones = (conservadorId?: string) => {
     queryFn: async () => {
       console.log("Ejecutando queryFn para obtener reparaciones");
       try {
-        let query = supabase
-          .from('reparaciones')
-          .select(`
+        // Use any to bypass TypeScript strict checking for the table name
+        // since Supabase types don't include the reparaciones table yet
+        const query = supabase
+          .from('reparaciones') as any
+          
+        let queryBuilder = query.select(`
+          id,
+          conservador_id,
+          descripcion_problema,
+          fecha_reporte,
+          fecha_reparacion,
+          costo,
+          repuestos_utilizados,
+          tecnico,
+          status,
+          notas,
+          conservador:conservador_id (
             id,
-            conservador_id,
-            descripcion_problema,
-            fecha_reporte,
-            fecha_reparacion,
-            costo,
-            repuestos_utilizados,
-            tecnico,
-            status,
-            notas,
-            conservador:conservador_id(
+            numero_serie,
+            modelo,
+            cliente:cliente_id (
               id,
-              numero_serie,
-              modelo,
-              cliente:cliente_id(
-                id,
-                nombre
-              )
+              nombre
             )
-          `)
-          .order('fecha_reporte', { ascending: false })
+          )
+        `)
+        .order('fecha_reporte', { ascending: false })
 
         if (conservadorId) {
-          query = query.eq('conservador_id', conservadorId)
+          queryBuilder = queryBuilder.eq('conservador_id', conservadorId)
         }
 
-        const { data, error } = await query
+        const { data, error } = await queryBuilder
         
         if (error) {
           console.error("Error en la consulta:", error);
@@ -74,7 +77,7 @@ export const useReparaciones = (conservadorId?: string) => {
         }
         
         console.log("Datos obtenidos de Supabase:", data);
-        return data || []
+        return data as Reparacion[] || []
       } catch (error) {
         console.error("Error fetching reparaciones:", error);
         return [];
@@ -87,8 +90,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async (newReparacion: Omit<Reparacion, 'id' | 'conservador'>) => {
       console.log("Creando nueva reparación:", newReparacion);
       
-      const { data, error } = await supabase
-        .from('reparaciones')
+      const { data, error } = await (supabase
+        .from('reparaciones') as any)
         .insert(newReparacion)
         .select()
         .single()
@@ -99,7 +102,7 @@ export const useReparaciones = (conservadorId?: string) => {
       }
       
       console.log("Reparación creada:", data);
-      return data;
+      return data as Reparacion;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reparaciones'] })
@@ -121,8 +124,8 @@ export const useReparaciones = (conservadorId?: string) => {
     mutationFn: async ({ id, ...updateData }: Reparacion) => {
       console.log("Actualizando reparación:", id, updateData);
       
-      const { data, error } = await supabase
-        .from('reparaciones')
+      const { data, error } = await (supabase
+        .from('reparaciones') as any)
         .update(updateData)
         .eq('id', id)
         .select()
@@ -134,7 +137,7 @@ export const useReparaciones = (conservadorId?: string) => {
       }
       
       console.log("Reparación actualizada:", data);
-      return data;
+      return data as Reparacion;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reparaciones'] })
@@ -155,7 +158,7 @@ export const useReparaciones = (conservadorId?: string) => {
   const deleteReparacion = useMutation({
     mutationFn: async (id: string) => {
       console.log("Eliminando reparación:", id);
-      const { error } = await supabase.from('reparaciones').delete().eq('id', id)
+      const { error } = await (supabase.from('reparaciones') as any).delete().eq('id', id)
       if (error) {
         console.error("Error al eliminar reparación:", error);
         throw error;
@@ -179,7 +182,7 @@ export const useReparaciones = (conservadorId?: string) => {
   })
 
   return {
-    reparaciones,
+    reparaciones: reparaciones as Reparacion[] | undefined,
     isLoading,
     createReparacion,
     updateReparacion,

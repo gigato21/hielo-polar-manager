@@ -36,12 +36,12 @@ export function ReparacionesList() {
   const [selectedReparacion, setSelectedReparacion] = useState<Reparacion | null>(null);
 
   // Filter reparaciones based on search term
-  const filteredReparaciones = reparaciones?.filter((reparacion: Reparacion) => 
+  const filteredReparaciones = reparaciones ? reparaciones.filter((reparacion) => 
     reparacion.descripcion_problema?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     reparacion.conservador?.numero_serie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     reparacion.conservador?.cliente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     reparacion.tecnico?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   const handleCreate = (formData: any) => {
     createReparacion.mutate({
@@ -141,8 +141,8 @@ export function ReparacionesList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredReparaciones && filteredReparaciones.length > 0 ? (
-            filteredReparaciones.map((reparacion: Reparacion) => (
+          {filteredReparaciones.length > 0 ? (
+            filteredReparaciones.map((reparacion) => (
               <Card key={reparacion.id} className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">

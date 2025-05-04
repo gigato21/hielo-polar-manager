@@ -78,7 +78,7 @@ export function ReparacionForm({
   initialData,
   isLoading = false,
 }: ReparacionFormProps) {
-  const { conservadores } = useConservadores();
+  const { conservadores = [] } = useConservadores();
   const [selectedConservadorId, setSelectedConservadorId] = useState<string | undefined>(
     initialData?.conservador_id
   );
@@ -134,12 +134,17 @@ export function ReparacionForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {conservadores?.map((conservador) => (
-                        <SelectItem key={conservador.id} value={conservador.id}>
-                          {conservador.numero_serie} - {conservador.modelo || "Sin modelo"} 
-                          {conservador.cliente ? ` - ${conservador.cliente.nombre}` : ""}
-                        </SelectItem>
-                      ))}
+                      {conservadores && conservadores.map((conservador: any) => {
+                        const displayText = `${conservador.numero_serie || "Sin número"} - ${conservador.modelo || "Sin modelo"}${
+                          conservador.cliente?.nombre ? ` - ${conservador.cliente.nombre}` : ""
+                        }`;
+                        
+                        return (
+                          <SelectItem key={conservador.id} value={conservador.id}>
+                            {displayText}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
