@@ -15,6 +15,7 @@ export const QrCodeGenerator = ({ value, size = 128 }: QrCodeGeneratorProps) => 
     
     const generateQR = async () => {
       try {
+        // @ts-ignore - ignoring TS error for module resolution
         await QRCode.toCanvas(canvasRef.current, value, {
           width: size,
           margin: 1,

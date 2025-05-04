@@ -1,3 +1,4 @@
+
 import QRCode from 'qrcode'
 
 export const generateQRCode = async (
@@ -6,6 +7,7 @@ export const generateQRCode = async (
 ) => {
   const url = `${window.location.origin}/conservador/${conservadorId}`
   try {
+    // @ts-ignore - ignoring TS error for module resolution
     const qrDataUrl = await QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
@@ -28,6 +30,7 @@ export const generateQRCodeSVG = async (
 ) => {
   const url = `${window.location.origin}/conservador/${conservadorId}`
   try {
+    // @ts-ignore - ignoring TS error for module resolution
     const qrSvg = await QRCode.toString(url, {
       type: 'svg',
       margin: 2,

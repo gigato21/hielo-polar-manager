@@ -20,10 +20,16 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['qrcode']
+  },
   build: {
+    commonjsOptions: {
+      include: [/qrcode/, /node_modules/]
+    },
     rollupOptions: {
-      // Add qrcode as external dependency to resolve build issues
-      external: ["qrcode"],
+      // This is now just for reference, using commonjsOptions is preferred
+      external: [],
     },
   },
 }));
