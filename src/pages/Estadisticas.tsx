@@ -17,7 +17,7 @@ export function EstadisticasPage() {
     <div className="container mx-auto py-6">
       <EstadisticasHeader dateRange={dateRange} setDateRange={setDateRange} />
       
-      <EstadisticasCards />
+      <EstadisticasCards dateRange={dateRange} />
       
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList>
@@ -29,8 +29,8 @@ export function EstadisticasPage() {
         
         <TabsContent value="general" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ServiciosChart />
-            <ClientesConservadoresChart />
+            <ServiciosChart dateRange={dateRange} />
+            <ClientesConservadoresChart dateRange={dateRange} />
             <EstadoConservadoresChart />
           </div>
         </TabsContent>
