@@ -11,17 +11,23 @@ import { MantenimientoDeleteDialog } from "./MantenimientoDeleteDialog";
 export function MantenimientosList() {
   const { mantenimientos, isLoading, createMantenimiento, updateMantenimiento, deleteMantenimiento } = useMantenimientos();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [selectedMantenimiento, setSelectedMantenimiento] = useState<any>(null);
 
-  // Filter mantenimientos based on search term
-  const filteredMantenimientos = mantenimientos ? mantenimientos.filter((mantenimiento) => 
-    mantenimiento.tipo_servicio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mantenimiento.conservador?.numero_serie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mantenimiento.tecnico?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  // Filter mantenimientos based on search term and status filter
+  const filteredMantenimientos = mantenimientos ? mantenimientos.filter((mantenimiento) => {
+    const matchesSearch = 
+      mantenimiento.tipo_servicio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mantenimiento.conservador?.numero_serie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mantenimiento.tecnico?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter ? mantenimiento.status === statusFilter : true;
+    
+    return matchesSearch && matchesStatus;
+  }) : [];
 
   const handleCreate = (formData: any) => {
     // Convert "null" string to actual null for conservador_id
@@ -98,6 +104,8 @@ export function MantenimientosList() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onCreateNew={() => setIsCreateDialogOpen(true)}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
       />
 
       {isLoading ? (
@@ -118,7 +126,7 @@ export function MantenimientosList() {
           ) : (
             <div className="col-span-full flex justify-center items-center p-10">
               <p className="text-muted-foreground">
-                {searchTerm
+                {searchTerm || statusFilter
                   ? "No se encontraron mantenimientos que coincidan con la búsqueda."
                   : "No hay mantenimientos registrados."}
               </p>
