@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from './pages/Dashboard'; 
@@ -14,7 +14,7 @@ import QRCode from './pages/QRCode';
 import { EstadisticasPage } from './pages/Estadisticas'; 
 import Configuracion from './pages/Configuracion';
 import { OrdenesServicioPage } from './pages/OrdenesServicio';
-import Reparaciones from './pages/Reparaciones'; // Import the new page
+import Reparaciones from './pages/Repairs'; // Import the new page
 
 const queryClient = new QueryClient();
 
