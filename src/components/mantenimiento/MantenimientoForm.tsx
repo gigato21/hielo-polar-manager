@@ -150,7 +150,7 @@ export function MantenimientoForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Sin conservador</SelectItem>
+                      <SelectItem value="null">Sin conservador</SelectItem>
                       {!conservadoresLoading &&
                         conservadores?.map((conservador) => (
                           <SelectItem key={conservador.id} value={conservador.id}>
