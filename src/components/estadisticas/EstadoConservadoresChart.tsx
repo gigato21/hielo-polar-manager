@@ -41,45 +41,43 @@ export function EstadoConservadoresChart() {
       try {
         setLoading(true);
         
-        // Get count of conservadores by status
+        // Instead of using group by, we'll manually count each status
+        const statusMap: Record<string, number> = {
+          'activo': 0,
+          'mantenimiento': 0,
+          'inactivo': 0,
+          'retirado': 0,
+          'reparacion': 0,
+        };
+
+        // Fetch all conservadores
         const { data: conservadores, error } = await supabase
           .from('conservadores')
-          .select('status, count(*)')
-          .group('status');
+          .select('status');
           
         if (error) {
           throw error;
         }
         
-        // Process the data for the chart
+        // Count each status manually
         if (conservadores) {
-          // Create a map of the initial data structure
-          const statusMap: Record<string, number> = {
-            'activo': 0,
-            'mantenimiento': 0,
-            'reparacion': 0, 
-            'inactivo': 0,
-            'retirado': 0,
-          };
-          
-          // Update counts from database results
           conservadores.forEach((item) => {
-            if (item.status && item.count) {
-              statusMap[item.status] = Number(item.count);
+            if (item.status && statusMap[item.status] !== undefined) {
+              statusMap[item.status]++;
             }
           });
-          
-          // Transform to expected format with Spanish labels
-          const chartData: EstadoCount[] = [
-            { estado: 'Activo', cantidad: statusMap['activo'] || 0 },
-            { estado: 'Mantenimiento', cantidad: statusMap['mantenimiento'] || 0 },
-            { estado: 'Reparación', cantidad: statusMap['reparacion'] || 0 },
-            { estado: 'Inactivo', cantidad: statusMap['inactivo'] || 0 },
-            { estado: 'Retirado', cantidad: statusMap['retirado'] || 0 },
-          ];
-          
-          setData(chartData);
         }
+        
+        // Transform to expected format with Spanish labels
+        const chartData: EstadoCount[] = [
+          { estado: 'Activo', cantidad: statusMap['activo'] || 0 },
+          { estado: 'Mantenimiento', cantidad: statusMap['mantenimiento'] || 0 },
+          { estado: 'Reparación', cantidad: statusMap['reparacion'] || 0 },
+          { estado: 'Inactivo', cantidad: statusMap['inactivo'] || 0 },
+          { estado: 'Retirado', cantidad: statusMap['retirado'] || 0 },
+        ];
+        
+        setData(chartData);
       } catch (err) {
         console.error('Error fetching conservadores data:', err);
         setError('Error al cargar los datos');

@@ -80,32 +80,8 @@ export function ServiciosChart({ dateRange }: ServiciosChartProps) {
           });
         }
         
-        // Fetch reparaciones by month
-        const { data: reparacionesData, error: reparacionesError } = await supabase
-          .from('reparaciones')
-          .select('fecha_reparacion')
-          .gte('fecha_reparacion', startDate.toISOString().split('T')[0])
-          .lte('fecha_reparacion', endDate.toISOString().split('T')[0])
-          .not('fecha_reparacion', 'is', null);
-          
-        if (reparacionesError) throw reparacionesError;
-        
-        // Count reparaciones by month
-        if (reparacionesData) {
-          reparacionesData.forEach(item => {
-            if (item.fecha_reparacion) {
-              const date = new Date(item.fecha_reparacion);
-              const monthIndex = monthsData.findIndex(m => 
-                m.date.getMonth() === date.getMonth() && 
-                m.date.getFullYear() === date.getFullYear()
-              );
-              
-              if (monthIndex !== -1) {
-                monthsData[monthIndex].reparaciones += 1;
-              }
-            }
-          });
-        }
+        // Note: We skip the reparaciones part for now since the table doesn't exist
+        // When the reparaciones table is created, we can add this logic back
 
         // Format data for the chart (remove the date object)
         setData(monthsData.map(({ date, ...rest }) => rest));
