@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Package, Phone, Mail, MapPin, X } from "lucide-react";
+import { Search, Package, Phone, Mail, MapPin, X, Edit, Image } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Cliente } from "@/hooks/useClientes";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ClientesListProps {
   clientes: Cliente[] | null;
@@ -18,6 +19,7 @@ interface ClientesListProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (cliente: Cliente) => void;
 }
 
 export const ClientesList = ({
@@ -26,6 +28,7 @@ export const ClientesList = ({
   searchTerm,
   onSearchChange,
   onDelete,
+  onEdit,
 }: ClientesListProps) => {
   // Filtrar clientes según término de búsqueda
   const filteredClientes = isLoading
@@ -63,18 +66,38 @@ export const ClientesList = ({
               <Card key={cliente.id} className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle>{cliente.nombre}</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(cliente.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        {cliente.imagen_url ? (
+                          <AvatarImage src={cliente.imagen_url} alt={cliente.nombre} />
+                        ) : (
+                          <AvatarFallback>{cliente.nombre.charAt(0)}</AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-lg">{cliente.nombre}</CardTitle>
+                        {cliente.contacto && (
+                          <CardDescription>{cliente.contacto}</CardDescription>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(cliente)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(cliente.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  {cliente.contacto && (
-                    <CardDescription>{cliente.contacto}</CardDescription>
-                  )}
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {cliente.telefono && (
@@ -99,6 +122,19 @@ export const ClientesList = ({
                     <Package className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span>{cliente.conservadores || '0'} conservadores</span>
                   </div>
+                  {cliente.comodato_url && (
+                    <div className="mt-2">
+                      <a 
+                        href={cliente.comodato_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:underline flex items-center"
+                      >
+                        <Image className="h-3 w-3 mr-1" />
+                        Ver contrato de comodato
+                      </a>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))

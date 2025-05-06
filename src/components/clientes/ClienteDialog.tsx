@@ -1,155 +1,207 @@
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Cliente } from "@/hooks/useClientes";
+import { FileUpload } from "@/components/ui/file-upload";
+
+type ClienteFormData = {
+  nombre: string;
+  contacto?: string;
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  imagen?: File | null;
+  comodato?: File | null;
+  imagen_url?: string;
+  comodato_url?: string;
+  rfc?: string;
+  id?: string;
+};
 
 interface ClienteDialogProps {
-  onSave: (cliente: Omit<Cliente, 'id'>) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave: (data: ClienteFormData) => void;
+  cliente?: Cliente | null;
 }
 
-export const ClienteDialog = ({ 
-  onSave, 
-  isOpen, 
-  onOpenChange 
-}: ClienteDialogProps) => {
-  const [nuevoCliente, setNuevoCliente] = useState<Omit<Cliente, 'id'>>({
-    nombre: '',
-    contacto: '',
-    email: '',
-    telefono: '',
-    direccion: '',
-    conservadores: '0'  // Changed from number to string
+export function ClienteDialog({
+  isOpen,
+  onOpenChange,
+  onSave,
+  cliente,
+}: ClienteDialogProps) {
+  const [formData, setFormData] = useState<ClienteFormData>({
+    nombre: "",
+    contacto: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    imagen: null,
+    comodato: null,
+    imagen_url: "",
+    comodato_url: "",
+    rfc: "",
   });
 
-  // Función para manejar cambios en los inputs del formulario
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Actualizar el formulario cuando se proporciona un cliente para editar
+  useEffect(() => {
+    if (cliente) {
+      setFormData({
+        id: cliente.id,
+        nombre: cliente.nombre || "",
+        contacto: cliente.contacto || "",
+        email: cliente.email || "",
+        telefono: cliente.telefono || "",
+        direccion: cliente.direccion || "",
+        imagen_url: cliente.imagen_url || "",
+        comodato_url: cliente.comodato_url || "",
+        rfc: cliente.rfc || "",
+        imagen: null,
+        comodato: null,
+      });
+    } else {
+      // Reiniciar el formulario cuando no hay cliente para editar
+      setFormData({
+        nombre: "",
+        contacto: "",
+        email: "",
+        telefono: "",
+        direccion: "",
+        imagen: null,
+        comodato: null,
+        imagen_url: "",
+        comodato_url: "",
+        rfc: "",
+      });
+    }
+  }, [cliente, isOpen]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setNuevoCliente(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    console.log("ClienteDialog - Guardando cliente:", nuevoCliente);
-    onSave(nuevoCliente);
-    setNuevoCliente({
-      nombre: '',
-      contacto: '',
-      email: '',
-      telefono: '',
-      direccion: '',
-      conservadores: '0'  // Changed from number to string
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button onClick={() => onOpenChange(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Nuevo Cliente
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="nombre" className="text-right">
-              Nombre
-            </Label>
-            <Input
-              id="nombre"
-              name="nombre"
-              value={nuevoCliente.nombre}
-              onChange={handleInputChange}
-              className="col-span-3"
+      <DialogContent className="sm:max-w-md">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>{cliente ? "Editar Cliente" : "Nuevo Cliente"}</DialogTitle>
+            <DialogDescription>
+              {cliente
+                ? "Actualiza la información del cliente."
+                : "Introduce los datos para el nuevo cliente."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="nombre">Nombre *</Label>
+              <Input
+                id="nombre"
+                name="nombre"
+                placeholder="Nombre del cliente"
+                value={formData.nombre}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="contacto">Persona de Contacto</Label>
+              <Input
+                id="contacto"
+                name="contacto"
+                placeholder="Nombre del contacto"
+                value={formData.contacto}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="rfc">RFC</Label>
+              <Input
+                id="rfc"
+                name="rfc"
+                placeholder="RFC"
+                value={formData.rfc}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="telefono">Teléfono</Label>
+              <Input
+                id="telefono"
+                name="telefono"
+                placeholder="Teléfono de contacto"
+                value={formData.telefono}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email de contacto"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="direccion">Dirección</Label>
+              <Textarea
+                id="direccion"
+                name="direccion"
+                placeholder="Dirección completa"
+                value={formData.direccion}
+                onChange={handleChange}
+                rows={2}
+              />
+            </div>
+            
+            <FileUpload
+              label="Imagen del Cliente/Negocio"
+              accept="image/*"
+              onChange={(file) => setFormData(prev => ({ ...prev, imagen: file }))}
+              value={formData.imagen || formData.imagen_url}
+              variant="image"
+              placeholder="Subir imagen..."
+            />
+            
+            <FileUpload
+              label="Contrato de Comodato"
+              accept=".pdf,.doc,.docx"
+              onChange={(file) => setFormData(prev => ({ ...prev, comodato: file }))}
+              value={formData.comodato || formData.comodato_url}
+              placeholder="Subir contrato..."
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="contacto" className="text-right">
-              Contacto
-            </Label>
-            <Input
-              id="contacto"
-              name="contacto"
-              value={nuevoCliente.contacto}
-              onChange={handleInputChange}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={nuevoCliente.email || ''}
-              onChange={handleInputChange}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="telefono" className="text-right">
-              Teléfono
-            </Label>
-            <Input
-              id="telefono"
-              name="telefono"
-              value={nuevoCliente.telefono || ''}
-              onChange={handleInputChange}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="direccion" className="text-right">
-              Dirección
-            </Label>
-            <Input
-              id="direccion"
-              name="direccion"
-              value={nuevoCliente.direccion || ''}
-              onChange={handleInputChange}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="conservadores" className="text-right">
-              Conservadores
-            </Label>
-            <Input
-              id="conservadores"
-              name="conservadores"
-              type="text"  // Changed from number to text
-              value={nuevoCliente.conservadores || '0'}
-              onChange={handleInputChange}
-              className="col-span-3"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave}>Guardar Cliente</Button>
-        </div>
+
+          <DialogFooter>
+            <Button type="submit">
+              {cliente ? "Guardar Cambios" : "Crear Cliente"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
-};
+}
