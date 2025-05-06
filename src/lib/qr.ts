@@ -3,9 +3,18 @@ import QRCode from 'qrcode'
 
 export const generateQRCode = async (
   conservadorId: string,
+  clienteInfo?: any,
+  conservadorInfo?: any,
   options: QRCode.QRCodeToDataURLOptions = {}
 ) => {
-  const url = `${window.location.origin}/conservador/${conservadorId}`
+  // Base URL for the conservador
+  const baseUrl = `${window.location.origin}/conservador/${conservadorId}`
+  
+  // Create a URL with query parameters for Odoo integration
+  // This is a placeholder - actual Odoo integration would require proper URL structure
+  const odooParams = clienteInfo ? `?cliente=${encodeURIComponent(clienteInfo.nombre || '')}` : ''
+  const url = `${baseUrl}${odooParams}`
+  
   try {
     // @ts-ignore - ignoring TS error for module resolution
     const qrDataUrl = await QRCode.toDataURL(url, {
@@ -26,9 +35,18 @@ export const generateQRCode = async (
 
 export const generateQRCodeSVG = async (
   conservadorId: string,
+  clienteInfo?: any,
+  conservadorInfo?: any,
   options: QRCode.QRCodeToStringOptions = {}
 ) => {
-  const url = `${window.location.origin}/conservador/${conservadorId}`
+  // Base URL for the conservador
+  const baseUrl = `${window.location.origin}/conservador/${conservadorId}`
+  
+  // Create a URL with query parameters for Odoo integration
+  // This is a placeholder - actual Odoo integration would require proper URL structure
+  const odooParams = clienteInfo ? `?cliente=${encodeURIComponent(clienteInfo.nombre || '')}` : ''
+  const url = `${baseUrl}${odooParams}`
+  
   try {
     // @ts-ignore - ignoring TS error for module resolution
     const qrSvg = await QRCode.toString(url, {
@@ -45,4 +63,4 @@ export const generateQRCodeSVG = async (
     console.error('Error generating QR code SVG:', err)
     throw err
   }
-} 
+}
