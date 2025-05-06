@@ -1,8 +1,7 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from './pages/Dashboard'; 
@@ -14,7 +13,10 @@ import QRCode from './pages/QRCode';
 import { EstadisticasPage } from './pages/Estadisticas'; 
 import Configuracion from './pages/Configuracion';
 import { OrdenesServicioPage } from './pages/OrdenesServicio';
-import Reparaciones from './pages/Repairs'; // Import the new page
+import Reparaciones from './pages/Repar';
+
+// Create a client
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -27,7 +29,7 @@ const App = () => (
             <Route path="/conservadores" element={<Conservadores />} />
             <Route path="/mantenimiento" element={<MantenimientoPage />} />
             <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
-            <Route path="/reparaciones" element={<Reparaciones />} /> {/* Add the new route */}
+            <Route path="/reparaciones" element={<Reparaciones />} />
             <Route path="/reportes" element={<Reportes />} />
             <Route path="/configuracion" element={<Configuracion />} />
             <Route path="/qr" element={<QRCode />} />
