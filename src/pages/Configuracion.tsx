@@ -26,6 +26,7 @@ const Configuracion = () => {
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
   const [notificacionesApp, setNotificacionesApp] = useState(true);
   const [diasAnticipacion, setDiasAnticipacion] = useState("7");
+  const [modoOscuro, setModoOscuro] = useState(false);
 
   useEffect(() => {
     const testSupabase = async () => {
@@ -40,9 +41,21 @@ const Configuracion = () => {
     testSupabase();
   }, []);
 
-  const handleSaveGeneral = () => {
-    console.log("Guardando configuración general...");
-    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  const handleSaveGeneral = async () => {
+    const config = {
+      id: "1", // Asegúrate de que la tabla tenga una columna `id` única
+      modoOscuro,
+    };
+
+    const { error } = await supabase
+      .from("configuracion")
+      .upsert(config, { onConflict: "id" }); // Cambié el array por una cadena
+
+    if (error) {
+      console.error("Error al guardar configuración general:", error);
+    } else {
+      console.log("Configuración general guardada correctamente.");
+    }
   };
 
   const handleSaveNotificaciones = () => {
