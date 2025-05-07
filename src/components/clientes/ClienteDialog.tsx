@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Cliente } from "@/hooks/useClientes";
-import { FileUpload } from "@/components/ui/fileupload";
+import { FileUpload } from "@/components/ui/file-upload";
 
 type ClienteFormData = {
   nombre: string;

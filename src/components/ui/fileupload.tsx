@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, File, Image as ImageIcon } from "lucide-react";
+import { Upload, File as FileIcon, Image as ImageIcon } from "lucide-react";
 
 interface FileUploadProps {
   accept?: string;
@@ -102,7 +102,7 @@ export function FileUpload({
                 }
               }}
             >
-              <File className="h-4 w-4" />
+              <FileIcon className="h-4 w-4" />
             </Button>
           )}
         </div>

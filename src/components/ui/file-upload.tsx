@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, File, Image as ImageIcon } from "lucide-react";
+import { Upload, File as FileIcon, Image as ImageIcon } from "lucide-react";
 
 interface FileUploadProps {
   accept?: string;
@@ -27,7 +27,9 @@ export function FileUpload({
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     typeof value === "string" ? value : null
   );
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(
+    value && typeof value !== "string" && value instanceof File ? value.name : null
+  );
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
@@ -90,12 +92,17 @@ export function FileUpload({
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => window.open(
-                typeof value === "string" ? value : URL.createObjectURL(value as File), 
-                "_blank"
-              )}
+              onClick={() => {
+                if (typeof value === "string") {
+                  window.open(value, "_blank");
+                } else if (value instanceof File) {
+                  const url = URL.createObjectURL(value);
+                  window.open(url, "_blank");
+                  URL.revokeObjectURL(url);
+                }
+              }}
             >
-              <File className="h-4 w-4" />
+              <FileIcon className="h-4 w-4" />
             </Button>
           )}
         </div>

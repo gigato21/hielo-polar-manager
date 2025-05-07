@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -28,7 +29,7 @@ import {
 import { Plus, MapPin, User, Store, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileUpload } from "@/components/ui/fileupload"; 
+import { FileUpload } from "@/components/ui/file-upload"; 
 
 // Updated the interface to accept formData in onSuccess
 export function ClienteForm({ onSuccess, onCancel }: { onSuccess: (formData: any) => void; onCancel: () => void }) {
