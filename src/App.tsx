@@ -13,7 +13,7 @@ import QRCode from './pages/QRCode';
 import { EstadisticasPage } from './pages/Estadisticas'; 
 import Configuracion from './pages/Configuracion';
 import { OrdenesServicioPage } from './pages/OrdenesServicio';
-import Reparaciones from './pages/Repar';
+import Reparaciones from './pages/Reparaciones';
 
 // Create a client
 const queryClient = new QueryClient();

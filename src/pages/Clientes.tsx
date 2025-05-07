@@ -1,126 +1,179 @@
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { FileUpload } from "@/components/ui/fileupload"; // Reemplazo de FileInput por FileUpload
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { ClienteForm } from "@/components/clientes/ClienteForm";
 
-import { useState } from "react";
-import { useClientes, Cliente } from "@/hooks/useClientes";
-import { useToast } from "@/hooks/use-toast";
-import { ClientesList } from "@/components/clientes/ClientesList";
-import { ClienteDialog } from "@/components/clientes/ClienteDialog";
+interface Cliente {
+  id: string;
+  nombre: string;
+  contacto: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+  conservadores: number;
+  negocioImagen?: File | null;
+  contratoPdf?: File | null;
+}
 
-const Clientes = () => {
-  const { clientes, isLoading, createCliente, updateCliente, deleteCliente } = useClientes();
-  const { toast } = useToast();
+// Datos de ejemplo
+const clientesData: Cliente[] = [
+  // ... (tus datos existentes de clientes)
+];
+
+const Clientes: React.FC = () => {
+  const [clientes, setClientes] = useState(clientesData);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [clienteToEdit, setClienteToEdit] = useState<Cliente | null>(null);
 
-  // Función para abrir el diálogo de edición
-  const handleEditCliente = (cliente: Cliente) => {
-    setClienteToEdit(cliente);
-    setIsDialogOpen(true);
-  };
-  
-  // Función para cerrar el diálogo y limpiar el cliente seleccionado
-  const handleDialogClose = () => {
+  const agregarCliente = (nuevoCliente: Omit<Cliente, "id">) => {
+    const nuevoId = `C${(clientes.length + 1).toString().padStart(3, "0")}`;
+    const clienteCompleto = { ...nuevoCliente, id: nuevoId };
+
+    setClientes([...clientes, clienteCompleto]);
     setIsDialogOpen(false);
-    setTimeout(() => setClienteToEdit(null), 300); // Limpiar después de la animación
   };
 
-  // Función para guardar un cliente (nuevo o editado)
-  const guardarCliente = (data: Omit<Cliente, 'id'> & { id?: string }) => {
-    console.log("Guardando cliente:", data);
-    
-    if (clienteToEdit && data.id) {
-      // Estamos editando un cliente existente
-      updateCliente.mutate(
-        { id: data.id, ...data } as Cliente, 
-        {
-          onSuccess: () => {
-            console.log("Cliente actualizado con éxito");
-            handleDialogClose();
-            toast({
-              title: "Cliente actualizado",
-              description: "El cliente ha sido actualizado exitosamente."
-            });
-          },
-          onError: (error) => {
-            console.error("Error al actualizar cliente:", error);
-            toast({
-              title: "Error",
-              description: "No se pudo actualizar el cliente.",
-              variant: "destructive"
-            });
-          }
-        }
-      );
-    } else {
-      // Estamos creando un nuevo cliente
-      createCliente.mutate(data, {
-        onSuccess: () => {
-          console.log("Cliente agregado con éxito");
-          handleDialogClose();
-          toast({
-            title: "Cliente creado",
-            description: "El cliente ha sido agregado exitosamente."
-          });
-        },
-        onError: (error) => {
-          console.error("Error al agregar cliente:", error);
-          toast({
-            title: "Error",
-            description: "No se pudo agregar el cliente.",
-            variant: "destructive"
-          });
-        }
-      });
-    }
-  };
-
-  // Función para eliminar un cliente
-  const eliminarCliente = (id: string) => {
-    console.log("Eliminando cliente:", id);
-    deleteCliente.mutate(id, {
-      onSuccess: () => {
-        console.log("Cliente eliminado con éxito");
-        toast({
-          title: "Cliente eliminado",
-          description: "El cliente ha sido eliminado exitosamente."
-        });
-      },
-      onError: (error) => {
-        console.error("Error al eliminar cliente:", error);
-        toast({
-          title: "Error",
-          description: "No se pudo eliminar el cliente.",
-          variant: "destructive"
-        });
-      }
-    });
-  };
-
-  console.log("Estado de carga:", isLoading);
-  console.log("Clientes disponibles:", clientes);
+  const filteredClientes = clientes.filter((cliente) =>
+    Object.values(cliente).some(
+      (value) =>
+        typeof value === "string" &&
+        value.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 justify-between">
-        <div className="w-full md:w-96">
-          {/* Espacio para el search que ahora está dentro de ClientesList */}
-        </div>
-        <ClienteDialog
-          cliente={clienteToEdit}
-          onSave={guardarCliente}
-          isOpen={isDialogOpen}
-          onOpenChange={handleDialogClose}
-        />
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Clientes</h1>
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          className="bg-polar-600 hover:bg-polar-700"
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Nuevo Cliente
+        </Button>
       </div>
 
-      <ClientesList
-        clientes={clientes}
-        isLoading={isLoading}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onDelete={eliminarCliente}
-        onEdit={handleEditCliente}
-      />
+      <Tabs defaultValue="list-view" className="w-full">
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="list-view">Lista de Clientes</TabsTrigger>
+          <TabsTrigger value="add-client">Agregar Cliente</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list-view">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Clientes</CardTitle>
+              <CardDescription>
+                Visualice todos los clientes registrados.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative w-full md:w-96 mb-4">
+                <Input
+                  placeholder="Buscar clientes..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div> {/* Asegúrate de que esta etiqueta de cierre esté presente */}
+              <ul className="space-y-4">
+                {filteredClientes.map((cliente) => (
+                  <li key={cliente.id} className="border p-4 rounded-md">
+                    <h3 className="font-bold">{cliente.nombre}</h3>
+                    <p>Contacto: {cliente.contacto}</p>
+                    <p>Email: {cliente.email}</p>
+                    <p>Teléfono: {cliente.telefono}</p>
+                    <p>Dirección: {cliente.direccion}</p>
+                    <p>Conservadores: {cliente.conservadores}</p>
+                    {cliente.negocioImagen && (
+                      <img
+                        src={URL.createObjectURL(cliente.negocioImagen)}
+                        alt="Imagen del negocio"
+                        className="w-32 h-32 object-cover mt-2"
+                      />
+                    )}
+                    {cliente.contratoPdf && (
+                      <a
+                        href={URL.createObjectURL(cliente.contratoPdf)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 underline mt-2 block"
+                      >
+                        Ver Contrato
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="add-client">
+          <Card>
+            <CardHeader>
+              <CardTitle>Agregar Nuevo Cliente</CardTitle>
+              <CardDescription>
+                Complete el formulario para registrar un nuevo cliente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ClienteForm
+                onSuccess={() => {
+                  agregarCliente({
+                    nombre: "Nuevo Cliente",
+                    contacto: "Contacto Ejemplo",
+                    email: "correo@ejemplo.com",
+                    telefono: "1234567890",
+                    direccion: "Dirección Ejemplo",
+                    conservadores: 0,
+                    negocioImagen: null,
+                    contratoPdf: null,
+                  });
+                }}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
+          </DialogHeader>
+          <ClienteForm
+            onSuccess={() => {
+              agregarCliente({
+                nombre: "Nuevo Cliente",
+                contacto: "Contacto Ejemplo",
+                email: "correo@ejemplo.com",
+                telefono: "1234567890",
+                direccion: "Dirección Ejemplo",
+                conservadores: 0,
+                negocioImagen: null,
+                contratoPdf: null,
+              });
+            }}
+            onCancel={() => setIsDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

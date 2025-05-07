@@ -1,9 +1,4 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { format } from 'date-fns'
-import { CalendarIcon, Upload, FileText } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -12,289 +7,521 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Tables } from '@/types/supabase'
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, MapPin, User, Store, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileUpload } from "@/components/ui/fileupload"; // Asegúrate de que la ruta sea correcta
 
-const clienteSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es requerido'),
-  razon_social: z.string().min(1, 'La razón social es requerida'),
-  rfc: z.string().min(12, 'El RFC debe tener al menos 12 caracteres'),
-  direccion_fiscal: z.string().min(1, 'La dirección fiscal es requerida'),
-  telefono: z.string().min(10, 'El teléfono debe tener al menos 10 dígitos'),
-  email: z.string().email('El email no es válido'),
-  notas: z.string().optional(),
-  // Campos para el contrato de comodato
-  contrato_comodato: z.object({
-    archivo: z.any().optional(), // Para el archivo PDF o imagen
-    fecha_firma: z.date(),
-    fecha_vencimiento: z.date().optional(),
-    notas: z.string().optional(),
-  }).optional(),
-})
-
-type ClienteFormValues = z.infer<typeof clienteSchema>
-
-interface ClienteFormProps {
-  cliente?: Tables['clientes']['Row'];
-  onSubmit: (data: ClienteFormValues) => void;
-  isLoading?: boolean;
-}
-
-export function ClienteForm({ cliente, onSubmit, isLoading }: ClienteFormProps) {
-  const form = useForm<ClienteFormValues>({
-    resolver: zodResolver(clienteSchema),
-    defaultValues: cliente || {
-      nombre: '',
-      razon_social: '',
-      rfc: '',
-      direccion_fiscal: '',
-      telefono: '',
-      email: '',
-      notas: '',
-      contrato_comodato: {
-        fecha_firma: new Date(),
+export function ClienteForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+  const form = useForm({
+    defaultValues: {
+      negocio: {
+        nombre: "",
+        tipo_negocio: "",
+        rfc: "",
+        giro: "",
+        imagen: null, // Agregado el campo imagen
       },
+      responsable: {
+        nombre: "",
+        apellidos: "",
+        puesto: "",
+      },
+      contacto: {
+        email: "",
+        telefono: "",
+        whatsapp: "",
+      },
+      ubicacion: {
+        calle: "",
+        numero_ext: "",
+        numero_int: "",
+        colonia: "",
+        municipio: "",
+        estado: "",
+        cp: "",
+        referencias: "",
+      },
+      documentacion: {
+        contrato_comodato: null,
+        identificacion: null,
+        comprobante_domicilio: null,
+      },
+      notas: "",
     },
-  })
+  });
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      form.setValue('contrato_comodato.archivo', file)
-    }
-  }
+  const onSubmit = (data: any) => {
+    console.log("Datos del formulario:", data);
+    onSuccess();
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nombre del cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <ScrollArea className="h-[80vh]">
+      <div className="p-1">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Columna izquierda - Datos del Negocio y Responsable */}
+            <div className="space-y-6">
+              {/* Card de Negocio */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Datos del Negocio</CardTitle>
+                      <CardDescription>Información comercial</CardDescription>
+                    </div>
+                    <Store className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="negocio.nombre"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre del Negocio</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre comercial" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="razon_social"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Razón Social</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Razón social del cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <FormField
+                    control={form.control}
+                    name="negocio.imagen"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Imagen del Negocio</FormLabel>
+                        <FormControl>
+                          <FileUpload
+                            accept="image/*"
+                            onChange={field.onChange}
+                            value={field.value}
+                            label=""
+                            variant="image"
+                            placeholder="Seleccionar imagen..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="rfc"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>RFC</FormLabel>
-                  <FormControl>
-                    <Input placeholder="RFC del cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <FormField
+                    control={form.control}
+                    name="negocio.tipo_negocio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Negocio</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona el tipo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="restaurante">Restaurante</SelectItem>
+                            <SelectItem value="abarrotes">Abarrotes</SelectItem>
+                            <SelectItem value="vinateria">Vinatería</SelectItem>
+                            <SelectItem value="supermercado">Supermercado</SelectItem>
+                            <SelectItem value="otro">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="direccion_fiscal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dirección Fiscal</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Dirección fiscal completa"
-                      className="resize-none"
-                      {...field}
+                  <FormField
+                    control={form.control}
+                    name="negocio.rfc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>RFC (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="RFC del negocio" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="negocio.giro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Giro (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Giro comercial" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Card de Responsable */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Datos del Responsable</CardTitle>
+                      <CardDescription>Persona a cargo</CardDescription>
+                    </div>
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="responsable.nombre"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nombre</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nombre(s)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
 
-          <div className="space-y-6">
-            <FormField
-              control={form.control}
-              name="telefono"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="Teléfono de contacto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Email de contacto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="notas"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Notas adicionales sobre el cliente"
-                      className="resize-none"
-                      {...field}
+                    <FormField
+                      control={form.control}
+                      name="responsable.apellidos"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Apellidos</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Apellidos" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+                  </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Contrato de Comodato</CardTitle>
-            <CardDescription>
-              Gestión del contrato de préstamo del conservador
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="contrato_comodato.fecha_firma"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Firma</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contrato_comodato.fecha_vencimiento"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Vencimiento</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
-                        onChange={(e) => field.onChange(new Date(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="responsable.puesto"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Puesto (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Puesto o cargo" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             </div>
 
-            <FormField
-              control={form.control}
-              name="contrato_comodato.archivo"
-              render={({ field: { value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Documento del Contrato</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="file"
-                        accept=".pdf,image/*"
-                        onChange={handleFileUpload}
-                        {...field}
-                      />
-                      {value && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => window.open(URL.createObjectURL(value), '_blank')}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                      )}
+            {/* Columna derecha - Contacto, Ubicación y Documentación */}
+            <div className="space-y-6">
+              {/* Card de Contacto */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Información de Contacto</CardTitle>
+                      <CardDescription>Medios para comunicación</CardDescription>
                     </div>
-                  </FormControl>
-                  <FormDescription>
-                    Sube el contrato de comodato escaneado (PDF) o una foto del documento
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="contacto.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="correo@ejemplo.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="contrato_comodato.notas"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas del Contrato</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Notas adicionales sobre el contrato"
-                      className="resize-none"
-                      {...field}
+                  <FormField
+                    control={form.control}
+                    name="contacto.telefono"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input placeholder="10 dígitos" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="contacto.whatsapp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>WhatsApp (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="10 dígitos" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Card de Ubicación */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Ubicación del Negocio</CardTitle>
+                      <CardDescription>Dirección física</CardDescription>
+                    </div>
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="ubicacion.calle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Calle</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre de la calle" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="ubicacion.numero_ext"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número Exterior</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Número exterior" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : cliente ? 'Actualizar Cliente' : 'Crear Cliente'}
-        </Button>
-      </form>
-    </Form>
-  )
+                    <FormField
+                      control={form.control}
+                      name="ubicacion.numero_int"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número Interior (opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Número interior" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="ubicacion.colonia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colonia</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre de la colonia" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="ubicacion.municipio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Municipio/Comunidad</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Municipio o comunidad" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="ubicacion.estado"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estado</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Estado" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="ubicacion.cp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Código Postal</FormLabel>
+                        <FormControl>
+                          <Input placeholder="5 dígitos" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ubicacion.referencias"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Referencias (opcional)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Referencias para ubicar el negocio"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Card de Documentación */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Documentación</CardTitle>
+                      <CardDescription>Archivos requeridos</CardDescription>
+                    </div>
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="documentacion.contrato_comodato"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contrato Comodato*</FormLabel>
+                        <FormControl>
+                          <FileUpload
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={field.onChange}
+                            value={field.value}
+                            label=""
+                            placeholder="Seleccionar archivo..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="documentacion.identificacion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Identificación Oficial*</FormLabel>
+                        <FormControl>
+                          <FileUpload
+                            accept=".pdf,.jpg,.jpeg,.png, webp"
+                            onChange={field.onChange}
+                            value={field.value}
+                            label=""
+                            placeholder="Seleccionar archivo..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="documentacion.comprobante_domicilio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Comprobante de Domicilio*</FormLabel>
+                        <FormControl>
+                          <FileUpload
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={field.onChange}
+                            value={field.value}
+                            label=""
+                            placeholder="Seleccionar archivo..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="md:col-span-2 flex justify-end gap-2 pt-4">
+              <Button variant="outline" type="button" onClick={onCancel}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                <Plus className="h-4 w-4 mr-1" />
+                Guardar Cliente
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </ScrollArea>
+  );
 }
