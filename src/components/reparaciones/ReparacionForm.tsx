@@ -1,72 +1,45 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, SaveIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useConservadores } from "@/hooks/useConservadores";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Reparacion } from "@/hooks/useReparaciones";
 
-const formSchema = z.object({
-  conservador_id: z.string({
-    required_error: "Seleccione un conservador",
-  }),
-  descripcion_problema: z.string({
-    required_error: "La descripción del problema es requerida",
-  }).min(5, "La descripción debe tener al menos 5 caracteres"),
-  fecha_reporte: z.date({
-    required_error: "La fecha de reporte es requerida",
-  }),
-  fecha_reparacion: z.date().optional().nullable(),
-  costo: z.coerce.number().optional().nullable(),
-  repuestos_utilizados: z.string().optional().nullable(),
-  tecnico: z.string().optional().nullable(),
-  status: z.enum(["pendiente", "en_proceso", "completada", "cancelada"], {
-    required_error: "Seleccione un estado",
-  }),
-  notas: z.string().optional().nullable(),
+// Schema for form validation
+const reparacionSchema = z.object({
+  conservador_id: z.string().min(1, "Seleccione un conservador"),
+  descripcion_problema: z.string().min(1, "Describa el problema"),
+  fecha_reporte: z.date(),
+  fecha_reparacion: z.date().nullable().optional(),
+  costo: z.preprocess(
+    (a) => (a === "" ? null : Number(a)),
+    z.number().nonnegative().nullable().optional()
+  ),
+  repuestos_utilizados: z.string().nullable().optional(),
+  tecnico: z.string().nullable().optional(),
+  status: z.enum(["pendiente", "en_proceso", "completada", "cancelada"]).default("pendiente"),
+  notas: z.string().nullable().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof reparacionSchema>;
 
 interface ReparacionFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: FormValues) => void;
+  onSubmit: (data: FormData) => void;
   initialData?: Reparacion;
   isLoading?: boolean;
 }
@@ -78,73 +51,84 @@ export function ReparacionForm({
   initialData,
   isLoading = false,
 }: ReparacionFormProps) {
-  const { conservadores = [] } = useConservadores();
-  const [selectedConservadorId, setSelectedConservadorId] = useState<string | undefined>(
-    initialData?.conservador_id
-  );
+  const [conservadores, setConservadores] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const defaultValues: Partial<FormValues> = {
-    conservador_id: initialData?.conservador_id || "",
-    descripcion_problema: initialData?.descripcion_problema || "",
-    fecha_reporte: initialData?.fecha_reporte ? new Date(initialData.fecha_reporte) : new Date(),
-    fecha_reparacion: initialData?.fecha_reparacion ? new Date(initialData.fecha_reparacion) : null,
-    costo: initialData?.costo || null,
-    repuestos_utilizados: initialData?.repuestos_utilizados || "",
-    tecnico: initialData?.tecnico || "",
-    status: initialData?.status || "pendiente",
-    notas: initialData?.notas || "",
-  };
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues,
+  // Initialize form with default values or initialData if editing
+  const form = useForm<FormData>({
+    resolver: zodResolver(reparacionSchema),
+    defaultValues: {
+      conservador_id: initialData?.conservador_id || "",
+      descripcion_problema: initialData?.descripcion_problema || "",
+      fecha_reporte: initialData?.fecha_reporte ? new Date(initialData.fecha_reporte) : new Date(),
+      fecha_reparacion: initialData?.fecha_reparacion ? new Date(initialData.fecha_reparacion) : null,
+      costo: initialData?.costo || null,
+      repuestos_utilizados: initialData?.repuestos_utilizados || "",
+      tecnico: initialData?.tecnico || "",
+      status: initialData?.status || "pendiente",
+      notas: initialData?.notas || "",
+    },
   });
 
-  function handleSubmit(values: FormValues) {
-    onSubmit(values);
-  }
+  // Fetch conservadores when the form opens
+  useEffect(() => {
+    const fetchConservadores = async () => {
+      try {
+        setLoading(true);
+        const { data } = await import("@/hooks/useConservadores").then(module => {
+          return { data: module.useConservadores().conservadores || [] };
+        });
+        setConservadores(data);
+      } catch (error) {
+        console.error("Error al cargar conservadores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (open) {
+      fetchConservadores();
+    }
+  }, [open]);
+
+  const handleFormSubmit = (data: FormData) => {
+    onSubmit(data);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Editar Reparación" : "Nueva Reparación"}
-          </DialogTitle>
+          <DialogTitle>{initialData ? "Editar Reparación" : "Nueva Reparación"}</DialogTitle>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+            {/* Conservador Field */}
             <FormField
               control={form.control}
               name="conservador_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Conservador</FormLabel>
-                  <Select
-                    disabled={isLoading}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setSelectedConservadorId(value);
-                    }}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Seleccione un conservador" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {conservadores && conservadores.map((conservador: any) => {
-                        const displayText = `${conservador.numero_serie || "Sin número"} - ${conservador.modelo || "Sin modelo"}${
-                          conservador.cliente?.nombre ? ` - ${conservador.cliente.nombre}` : ""
-                        }`;
-                        
-                        return (
+                      {loading ? (
+                        <div className="flex justify-center py-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        </div>
+                      ) : (
+                        conservadores.map((conservador) => (
                           <SelectItem key={conservador.id} value={conservador.id}>
-                            {displayText}
+                            {conservador.numero_serie} - {conservador.modelo || "Sin modelo"}
                           </SelectItem>
-                        );
-                      })}
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -152,16 +136,17 @@ export function ReparacionForm({
               )}
             />
 
+            {/* Descripción del Problema */}
             <FormField
               control={form.control}
               name="descripcion_problema"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción del problema</FormLabel>
+                  <FormLabel>Descripción del Problema</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describa el problema del conservador"
-                      disabled={isLoading}
+                      placeholder="Describa el problema en detalle"
+                      className="resize-none min-h-[80px]"
                       {...field}
                     />
                   </FormControl>
@@ -170,28 +155,28 @@ export function ReparacionForm({
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fecha Reporte and Fecha Reparación */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="fecha_reporte"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de reporte</FormLabel>
+                    <FormLabel>Fecha de Reporte</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant="outline"
                             className={cn(
-                              "pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
-                            disabled={isLoading}
                           >
                             {field.value ? (
                               format(field.value, "PPP", { locale: es })
                             ) : (
-                              <span>Seleccione una fecha</span>
+                              <span>Seleccionar fecha</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -202,11 +187,8 @@ export function ReparacionForm({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date()
-                          }
+                          locale={es}
                           initialFocus
-                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>
@@ -214,28 +196,26 @@ export function ReparacionForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="fecha_reparacion"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de reparación</FormLabel>
+                    <FormLabel>Fecha de Reparación</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant="outline"
                             className={cn(
-                              "pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
-                            disabled={isLoading}
                           >
                             {field.value ? (
                               format(field.value, "PPP", { locale: es })
                             ) : (
-                              <span>Seleccione una fecha</span>
+                              <span>Seleccionar fecha</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -246,8 +226,8 @@ export function ReparacionForm({
                           mode="single"
                           selected={field.value || undefined}
                           onSelect={field.onChange}
+                          locale={es}
                           initialFocus
-                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>
@@ -257,21 +237,18 @@ export function ReparacionForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Status and Técnico */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
-                    <Select
-                      disabled={isLoading}
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione un estado" />
+                          <SelectValue placeholder="Seleccionar estado" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -285,33 +262,6 @@ export function ReparacionForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="costo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Costo</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Costo de la reparación"
-                        disabled={isLoading}
-                        {...field}
-                        value={field.value === null ? "" : field.value}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(value === "" ? null : Number(value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="tecnico"
@@ -321,26 +271,6 @@ export function ReparacionForm({
                     <FormControl>
                       <Input
                         placeholder="Nombre del técnico"
-                        disabled={isLoading}
-                        {...field}
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="repuestos_utilizados"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Repuestos utilizados</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Repuestos utilizados"
-                        disabled={isLoading}
                         {...field}
                         value={field.value || ""}
                       />
@@ -351,16 +281,60 @@ export function ReparacionForm({
               />
             </div>
 
+            {/* Costo and Repuestos */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="costo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Costo</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value === null ? "" : field.value}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === "" ? null : parseFloat(value));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="repuestos_utilizados"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repuestos Utilizados</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Lista de repuestos"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Notas */}
             <FormField
               control={form.control}
               name="notas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas adicionales</FormLabel>
+                  <FormLabel>Notas Adicionales</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Notas adicionales sobre la reparación"
-                      disabled={isLoading}
+                      className="resize-none"
                       {...field}
                       value={field.value || ""}
                     />
@@ -371,8 +345,17 @@ export function ReparacionForm({
             />
 
             <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancelar
+              </Button>
               <Button type="submit" disabled={isLoading}>
-                {initialData ? "Actualizar" : "Crear"}
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <SaveIcon className="mr-2 h-4 w-4" />
+                {initialData ? "Actualizar" : "Guardar"}
               </Button>
             </DialogFooter>
           </form>

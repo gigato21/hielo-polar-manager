@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Search, Plus, AlertCircle, CheckCircle2, Clock, X } from "lucide-react";
+import { Search, Plus, AlertCircle, CheckCircle2, Clock, X, Tool } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
