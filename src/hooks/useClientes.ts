@@ -143,7 +143,8 @@ export const useClientes = () => {
       // Subir imagen si existe una nueva
       if (updateData.imagen) {
         try {
-          imagen_url = await uploadFile(updateData.imagen, 'clientes', 'imagenes');
+          // Fix: Updated to use only 2 arguments
+          imagen_url = await uploadFile(updateData.imagen, 'imagenes');
         } catch (error) {
           console.error("Error al subir imagen:", error);
           throw error;
@@ -153,7 +154,8 @@ export const useClientes = () => {
       // Subir archivo de comodato si existe uno nuevo
       if (updateData.comodato) {
         try {
-          comodato_url = await uploadFile(updateData.comodato, 'clientes', 'comodatos');
+          // Fix: Updated to use only 2 arguments
+          comodato_url = await uploadFile(updateData.comodato, 'comodatos');
         } catch (error) {
           console.error("Error al subir comodato:", error);
           throw error;
