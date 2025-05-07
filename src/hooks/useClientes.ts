@@ -17,7 +17,10 @@ export interface Cliente {
 }
 
 // Función para subir un archivo al Storage de Supabase
-const uploadFile = async (file: File, bucket: string, folder: string) => {
+const uploadFile = async (file: File, folder: string) => {
+  // Usamos el bucket 'clientes' que acabamos de crear
+  const bucket = 'clientes';
+  
   const fileExt = file.name.split('.').pop();
   const fileName = `${folder}/${Math.random().toString(36).substring(2)}.${fileExt}`;
   
@@ -80,7 +83,7 @@ export const useClientes = () => {
       // Subir imagen si existe
       if (newCliente.imagen) {
         try {
-          imagen_url = await uploadFile(newCliente.imagen, 'clientes', 'imagenes');
+          imagen_url = await uploadFile(newCliente.imagen, 'imagenes');
         } catch (error) {
           console.error("Error al subir imagen:", error);
           throw error;
@@ -90,7 +93,7 @@ export const useClientes = () => {
       // Subir archivo de comodato si existe
       if (newCliente.comodato) {
         try {
-          comodato_url = await uploadFile(newCliente.comodato, 'clientes', 'comodatos');
+          comodato_url = await uploadFile(newCliente.comodato, 'comodatos');
         } catch (error) {
           console.error("Error al subir comodato:", error);
           throw error;

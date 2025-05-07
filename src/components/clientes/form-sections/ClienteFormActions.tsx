@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface ClienteFormActionsProps {
   onCancel: () => void;
@@ -14,7 +14,7 @@ export function ClienteFormActions({ onCancel, isSubmitting = false }: ClienteFo
         Cancelar
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        <Plus className="h-4 w-4 mr-1" />
+        <Save className="h-4 w-4 mr-1" />
         Guardar Cliente
       </Button>
     </div>

@@ -16,6 +16,7 @@ import { ClientesList } from "@/components/clientes/ClientesList";
 import { ClienteDialog } from "@/components/clientes/ClienteDialog";
 import { useClientes, Cliente } from "@/hooks/useClientes";
 import { useToast } from "@/hooks/use-toast";
+import { ClienteFormData } from "@/components/clientes/form-sections/ClienteFormSchema";
 
 const Clientes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,8 +74,7 @@ const Clientes: React.FC = () => {
     }
   };
 
-  // Fix: Modified to accept formData parameter
-  const handleFormSuccess = (formData: any) => {
+  const handleFormSuccess = (formData: ClienteFormData) => {
     console.log("Datos del formulario completo:", formData);
     
     // Transformar los datos del formulario al formato esperado por la API
@@ -99,11 +99,11 @@ const Clientes: React.FC = () => {
           });
           setIsFormDialogOpen(false);
         },
-        onError: (error) => {
+        onError: (error: any) => {
           console.error("Error al crear cliente:", error);
           toast({
             title: "Error",
-            description: "No se pudo crear el cliente. Inténtelo de nuevo.",
+            description: error.message || "No se pudo crear el cliente. Inténtelo de nuevo.",
             variant: "destructive"
           });
         }
