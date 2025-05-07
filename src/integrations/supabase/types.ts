@@ -396,7 +396,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
+      },
+      configuracion: {
+        Row: {
+          id: string;
+          notificacionesEmail: boolean;
+          notificacionesApp: boolean;
+          diasAnticipacion: string;
+          modoOscuro: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          notificacionesEmail?: boolean;
+          notificacionesApp?: boolean;
+          diasAnticipacion?: string;
+          modoOscuro?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          notificacionesEmail?: boolean;
+          notificacionesApp?: boolean;
+          diasAnticipacion?: string;
+          modoOscuro?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      },
+      reparaciones: {
+        Row: {
+          id: string;
+          conservador_id: string;
+          descripcion_problema: string;
+          fecha_reporte: string;
+          fecha_reparacion: string | null;
+          costo: number | null;
+          repuestos_utilizados: string | null;
+          tecnico: string | null;
+          status: Database["public"]["Enums"]["estado_orden"];
+          notas: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conservador_id: string;
+          descripcion_problema: string;
+          fecha_reporte: string;
+          fecha_reparacion?: string | null;
+          costo?: number | null;
+          repuestos_utilizados?: string | null;
+          tecnico?: string | null;
+          status?: Database["public"]["Enums"]["estado_orden"];
+          notas?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conservador_id?: string;
+          descripcion_problema?: string;
+          fecha_reporte?: string;
+          fecha_reparacion?: string | null;
+          costo?: number | null;
+          repuestos_utilizados?: string | null;
+          tecnico?: string | null;
+          status?: Database["public"]["Enums"]["estado_orden"];
+          notas?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reparaciones_conservador_id_fkey";
+            columns: ["conservador_id"];
+            isOneToOne: false;
+            referencedRelation: "conservadores";
+            referencedColumns: ["id"];
+          },
+        ];
+      },
     }
     Views: {
       [_ in never]: never

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -20,11 +20,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/lib/supabaseClient";
 
 const Configuracion = () => {
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
   const [notificacionesApp, setNotificacionesApp] = useState(true);
   const [diasAnticipacion, setDiasAnticipacion] = useState("7");
+
+  useEffect(() => {
+    const testSupabase = async () => {
+      const { data, error } = await supabase.from("configuracion").select("*");
+      if (error) {
+        console.error("Error al conectar con Supabase:", error);
+      } else {
+        console.log("Datos obtenidos de Supabase:", data);
+      }
+    };
+
+    testSupabase();
+  }, []);
 
   const handleSaveGeneral = () => {
     console.log("Guardando configuración general...");
