@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -217,7 +216,7 @@ const Clientes: React.FC = () => {
 
       {/* Dialog for detailed form */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Registrar Cliente Detallado</DialogTitle>
           </DialogHeader>
