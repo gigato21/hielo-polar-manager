@@ -71,9 +71,6 @@ export default function Sidebar() {
         )}
       >
         <div className="flex items-center justify-between h-16 border-b px-4">
-          <div className="flex items-center justify-center w-full">
-            <img src="/logo-removebg-preview.png" alt="Logo" className="h-12" />
-          </div>
           <Button
             onClick={toggleSidebar}
             variant="ghost"
