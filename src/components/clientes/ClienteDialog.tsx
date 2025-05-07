@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Cliente } from "@/hooks/useClientes";
-import { FileUpload } from "@/components/ui/file-upload";
+import { FileUpload } from "@/components/ui/fileupload";
 
 type ClienteFormData = {
   nombre: string;
