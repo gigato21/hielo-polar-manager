@@ -26,6 +26,7 @@ const navItems = [
   { name: "Estadísticas", path: "/estadisticas", icon: ChartBar },
   { name: "QR Codes", path: "/qr", icon: QrCode },
   { name: "Configuración", path: "/configuracion", icon: Settings },
+  { name: "Reparaciones", path: "/reparaciones", icon: Wrench },
 ];
 
 export default function Sidebar() {
