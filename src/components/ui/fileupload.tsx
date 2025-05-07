@@ -28,7 +28,7 @@ export function FileUpload({
     typeof value === "string" ? value : null
   );
   const [fileName, setFileName] = useState<string | null>(
-    value instanceof File ? value.name : null
+    value && typeof value !== "string" && value instanceof File ? value.name : null
   );
 
   const handleButtonClick = () => {
