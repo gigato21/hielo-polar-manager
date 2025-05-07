@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -26,6 +25,21 @@ const Configuracion = () => {
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
   const [notificacionesApp, setNotificacionesApp] = useState(true);
   const [diasAnticipacion, setDiasAnticipacion] = useState("7");
+
+  const handleSaveGeneral = () => {
+    console.log("Guardando configuración general...");
+    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  };
+
+  const handleSaveNotificaciones = () => {
+    console.log("Guardando configuración de notificaciones...");
+    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  };
+
+  const handleSaveEmpresa = () => {
+    console.log("Guardando datos de la empresa...");
+    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  };
 
   return (
     <div className="container mx-auto py-6">
@@ -107,7 +121,7 @@ const Configuracion = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button>Guardar Cambios</Button>
+              <Button onClick={handleSaveGeneral}>Guardar Cambios</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -177,7 +191,7 @@ const Configuracion = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button>Guardar Preferencias</Button>
+              <Button onClick={handleSaveNotificaciones}>Guardar Preferencias</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -234,7 +248,7 @@ const Configuracion = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button>Guardar Información</Button>
+              <Button onClick={handleSaveEmpresa}>Guardar Información</Button>
             </CardFooter>
           </Card>
         </TabsContent>
