@@ -28,9 +28,10 @@ import {
 import { Plus, MapPin, User, Store, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileUpload } from "@/components/ui/fileupload"; // Asegúrate de que la ruta sea correcta
+import { FileUpload } from "@/components/ui/fileupload"; 
 
-export function ClienteForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+// Updated the interface to accept formData in onSuccess
+export function ClienteForm({ onSuccess, onCancel }: { onSuccess: (formData: any) => void; onCancel: () => void }) {
   const form = useForm({
     defaultValues: {
       negocio: {
@@ -38,7 +39,7 @@ export function ClienteForm({ onSuccess, onCancel }: { onSuccess: () => void; on
         tipo_negocio: "",
         rfc: "",
         giro: "",
-        imagen: null, // Agregado el campo imagen
+        imagen: null,
       },
       responsable: {
         nombre: "",
@@ -71,7 +72,7 @@ export function ClienteForm({ onSuccess, onCancel }: { onSuccess: () => void; on
 
   const onSubmit = (data: any) => {
     console.log("Datos del formulario:", data);
-    onSuccess();
+    onSuccess(data); // Pass the form data to the onSuccess callback
   };
 
   return (

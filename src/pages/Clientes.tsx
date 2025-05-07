@@ -73,6 +73,7 @@ const Clientes: React.FC = () => {
     }
   };
 
+  // Fix: Modified to accept formData parameter
   const handleFormSuccess = (formData: any) => {
     console.log("Datos del formulario completo:", formData);
     
