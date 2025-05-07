@@ -95,6 +95,10 @@ export default function Sidebar() {
           </Button>
         </div>
 
+        <div className="flex items-center justify-center h-16 border-b">
+          <img src="/logo-removebg-preview.png" alt="Logo" className="h-12" />
+        </div>
+
         <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <Link
