@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +8,7 @@ import { UbicacionSection } from "./form-sections/UbicacionSection";
 import { DocumentacionSection } from "./form-sections/DocumentacionSection";
 import { ClienteFormActions } from "./form-sections/ClienteFormActions";
 import { clienteFormDefaultValues, ClienteFormData } from "./form-sections/ClienteFormSchema";
+import { useClientes } from '@/hooks/useClientes';
 
 interface ClienteFormProps {
   onSuccess: (formData: ClienteFormData) => void;
@@ -20,9 +20,26 @@ export function ClienteForm({ onSuccess, onCancel }: ClienteFormProps) {
     defaultValues: clienteFormDefaultValues,
   });
 
-  const onSubmit = (data: ClienteFormData) => {
-    console.log("Datos del formulario:", data);
-    onSuccess(data);
+  const { createCliente } = useClientes();
+
+  const onSubmit = async (data: ClienteFormData) => {
+    try {
+      const formattedData = {
+        nombre: data.negocio.nombre,
+        contacto: data.contacto.email,
+        telefono: data.contacto.telefono,
+        direccion: `${data.ubicacion.calle}, ${data.ubicacion.numero_ext}, ${data.ubicacion.colonia}, ${data.ubicacion.municipio}, ${data.ubicacion.estado}, ${data.ubicacion.cp}`,
+        rfc: data.negocio.rfc,
+        imagen: data.negocio.imagen, // Ajustar si es un archivo
+        comodato: data.documentacion.contrato_comodato, // Ajustar si es un archivo
+        notas: data.notas,
+      };
+
+      await createCliente.mutateAsync(formattedData);
+      onSuccess(data);
+    } catch (error) {
+      console.error('Error al guardar el cliente:', error);
+    }
   };
 
   return (

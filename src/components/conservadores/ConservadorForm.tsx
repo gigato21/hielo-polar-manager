@@ -31,6 +31,7 @@ import {
 import { Plus, MapPin, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useConservadores } from '@/hooks/useConservadores';
 
 // Esquema de validación con Zod
 const formSchema = z.object({
@@ -62,6 +63,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ConservadorForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+  const { createConservador } = useConservadores();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,9 +79,22 @@ export function ConservadorForm({ onSuccess, onCancel }: { onSuccess: () => void
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Datos del formulario:", data);
-    onSuccess();
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const formattedData = {
+        numero_serie: data.numero_serie,
+        modelo: data.modelo,
+        capacidad: parseInt(data.capacidad, 10),
+        status: data.estado,
+        notas: data.notas,
+        cliente_id: null, // Ajustar según sea necesario
+        qr_code: null, // Ajustar según sea necesario
+      };
+      await createConservador.mutateAsync(formattedData);
+      onSuccess();
+    } catch (error) {
+      console.error('Error al guardar el conservador:', error);
+    }
   };
 
   return (
