@@ -63,9 +63,28 @@ const Configuracion = () => {
     // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
   };
 
-  const handleSaveEmpresa = () => {
-    console.log("Guardando datos de la empresa...");
-    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  const handleSaveEmpresa = async () => {
+    const empresaData = {
+      id: "1", // Asegúrate de que la tabla tenga una columna `id` única
+      nombre: (document.getElementById("nombre-empresa") as HTMLInputElement).value,
+      rfc: (document.getElementById("rfc") as HTMLInputElement).value,
+      direccion: (document.getElementById("direccion") as HTMLInputElement).value,
+      ciudad: (document.getElementById("ciudad") as HTMLInputElement).value,
+      estado: (document.getElementById("estado") as HTMLInputElement).value,
+      cp: (document.getElementById("cp") as HTMLInputElement).value,
+      telefono: (document.getElementById("telefono") as HTMLInputElement).value,
+      email: (document.getElementById("email-empresa") as HTMLInputElement).value,
+    };
+
+    const { error } = await supabase
+      .from("empresa")
+      .upsert(empresaData, { onConflict: "id" });
+
+    if (error) {
+      console.error("Error al guardar datos de la empresa:", error);
+    } else {
+      console.log("Datos de la empresa guardados correctamente.");
+    }
   };
 
   return (

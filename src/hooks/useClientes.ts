@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast"
@@ -111,11 +110,15 @@ export const useClientes = () => {
         conservadores: newCliente.conservadores || "0"
       };
       
+      console.log("Datos enviados a Supabase:", clienteToInsert);
+      
       const { data, error } = await supabase
         .from('clientes')
         .insert(clienteToInsert)
         .select()
         .single()
+
+      console.log("Respuesta de Supabase:", { data, error });
 
       if (error) {
         console.error("Error al crear cliente:", error);
