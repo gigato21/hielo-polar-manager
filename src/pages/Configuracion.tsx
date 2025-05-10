@@ -76,9 +76,13 @@ const Configuracion = () => {
       email: (document.getElementById("email-empresa") as HTMLInputElement).value,
     };
 
+    console.log("Datos enviados a Supabase:", empresaData);
+
     const { error } = await supabase
       .from("empresa")
       .upsert(empresaData, { onConflict: "id" });
+
+    console.log("Respuesta de Supabase:", { error });
 
     if (error) {
       console.error("Error al guardar datos de la empresa:", error);
