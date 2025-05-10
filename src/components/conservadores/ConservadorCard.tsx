@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ConservadorForm } from "./ConservadorForm";
 
 interface ConservadorData {
   id: string;
@@ -22,6 +23,7 @@ interface ConservadorData {
 
 export function ConservadorCard({ conservador }: { conservador: ConservadorData }) {
   const [showDetails, setShowDetails] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const getStatusVariant = () => {
     switch (conservador.estado) {
@@ -63,14 +65,23 @@ export function ConservadorCard({ conservador }: { conservador: ConservadorData 
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span>Último mantenimiento: {conservador.ultimoMantenimiento}</span>
           </div>
-          <Button
-            variant="outline"
-            className="w-full mt-4"
-            onClick={() => setShowDetails(true)}
-          >
-            <FileText className="h-4 w-4 mr-1" />
-            Detalles
-          </Button>
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowDetails(true)}
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Detalles
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsEditing(true)}
+            >
+              Editar
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -116,6 +127,20 @@ export function ConservadorCard({ conservador }: { conservador: ConservadorData 
               <p className="text-sm col-span-3">{conservador.ultimoMantenimiento}</p>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de edición */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Conservador</DialogTitle>
+          </DialogHeader>
+          <ConservadorForm
+            onSuccess={() => setIsEditing(false)}
+            onCancel={() => setIsEditing(false)}
+            defaultValues={conservador}
+          />
         </DialogContent>
       </Dialog>
     </>
