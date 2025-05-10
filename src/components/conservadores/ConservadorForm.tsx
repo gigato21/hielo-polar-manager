@@ -90,10 +90,12 @@ export function ConservadorForm({ onSuccess, onCancel }: { onSuccess: () => void
         cliente_id: null, // Ajustar según sea necesario
         qr_code: null, // Ajustar según sea necesario
       };
+      console.log("Datos enviados a Supabase:", formattedData);
       await createConservador.mutateAsync(formattedData);
       onSuccess();
     } catch (error) {
       console.error('Error al guardar el conservador:', error);
+      console.log("Respuesta de Supabase:", { error });
     }
   };
 
