@@ -15,32 +15,41 @@ import Configuracion from './pages/Configuracion';
 import { OrdenesServicioPage } from './pages/OrdenesServicio';
 import Reparaciones from './pages/Reparaciones';
 
-// Create a client
-const queryClient = new QueryClient();
+// Initialize queryClient outside the component
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Router>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/conservadores" element={<Conservadores />} />
-            <Route path="/mantenimiento" element={<MantenimientoPage />} />
-            <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
-            <Route path="/reparaciones" element={<Reparaciones />} />
-            <Route path="/reportes" element={<Reportes />} />
-            <Route path="/configuracion" element={<Configuracion />} />
-            <Route path="/qr" element={<QRCode />} />
-            <Route path="/estadisticas" element={<EstadisticasPage />} />
-          </Route>
-        </Routes>
-        <Toaster />
-        <Sonner />
-      </Router>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/clientes" element={<Clientes />} />
+              <Route path="/conservadores" element={<Conservadores />} />
+              <Route path="/mantenimiento" element={<MantenimientoPage />} />
+              <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
+              <Route path="/reparaciones" element={<Reparaciones />} />
+              <Route path="/reportes" element={<Reportes />} />
+              <Route path="/configuracion" element={<Configuracion />} />
+              <Route path="/qr" element={<QRCode />} />
+              <Route path="/estadisticas" element={<EstadisticasPage />} />
+            </Route>
+          </Routes>
+          <Toaster />
+          <Sonner />
+        </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
