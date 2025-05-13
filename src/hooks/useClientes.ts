@@ -21,7 +21,8 @@ const uploadFile = async (file: File, folder: string) => {
   const bucket = 'clientes';
   
   const fileExt = file.name.split('.').pop();
-  const fileName = `${folder}/${Math.random().toString(36).substring(2)}.${fileExt}`;
+  // Asegurarse de que no haya doble slash en la ruta del archivo
+  const fileName = `${folder}/${Math.random().toString(36).substring(2)}.${fileExt}`.replace(/\/\/+/, '/');
   
   console.log("Archivo recibido para subir:", file);
 

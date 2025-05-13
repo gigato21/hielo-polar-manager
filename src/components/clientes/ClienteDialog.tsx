@@ -159,7 +159,7 @@ export function ClienteDialog({
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Email de contacto"
+                placeholder="Correo electrónico"
                 value={formData.email}
                 onChange={handleChange}
               />
