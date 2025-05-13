@@ -1,3 +1,6 @@
+// Ensure this file is the only place where Supabase is initialized
+// Avoid creating multiple instances of SupabaseClient in the application
+// Import this instance wherever Supabase is needed
 
 import { createClient } from "@supabase/supabase-js";
 
