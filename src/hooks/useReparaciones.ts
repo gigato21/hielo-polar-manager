@@ -21,7 +21,6 @@ export interface Reparacion {
     numero_serie: string;
     modelo: string | null;
     cliente?: {
-    cliente?: {
       id: string;
       nombre: string;
     } | null;
