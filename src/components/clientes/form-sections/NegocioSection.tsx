@@ -89,12 +89,12 @@ export function NegocioSection({ control }: NegocioSectionProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="restaurante">Restaurante</SelectItem>
                   <SelectItem value="abarrotes">Abarrotes</SelectItem>
-                  <SelectItem value="vinateria">Vinatería</SelectItem>
-                  <SelectItem value="supermercado">Supermercado</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
                   <SelectItem value="deposito">Depósito</SelectItem>
+                  <SelectItem value="restaurante">Restaurante</SelectItem>
+                  <SelectItem value="supermercado">Supermercado</SelectItem>
+                  <SelectItem value="vinateria">Vinatería</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
