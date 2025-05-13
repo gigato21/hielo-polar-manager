@@ -1,4 +1,3 @@
-
 import {
   FormField,
   FormItem,
@@ -95,6 +94,7 @@ export function NegocioSection({ control }: NegocioSectionProps) {
                   <SelectItem value="vinateria">Vinatería</SelectItem>
                   <SelectItem value="supermercado">Supermercado</SelectItem>
                   <SelectItem value="otro">Otro</SelectItem>
+                  <SelectItem value="deposito">Depósito</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
