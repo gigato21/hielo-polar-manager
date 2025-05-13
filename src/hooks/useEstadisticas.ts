@@ -63,7 +63,8 @@ export function useEstadisticas({ dateRange }: EstadisticasProps = {}) {
         // Get conservadores count by client
         const { data: clientesData, error: clientesError } = await supabase
           .from('conservadores')
-          .select('cliente_id, clientes(nombre)');
+          .select('cliente_id, clientes(nombre)')
+          .returns<{ cliente_id: string; clientes: { nombre: string } }[]>();
           
         if (clientesError) throw clientesError;
 
