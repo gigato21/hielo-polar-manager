@@ -1,6 +1,5 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
+import { supabase } from '@/lib/supabaseClient';
 import { useToast } from "@/hooks/use-toast"
 
 // Define the reparación status type
@@ -21,6 +20,7 @@ export interface Reparacion {
     id: string;
     numero_serie: string;
     modelo: string | null;
+    cliente?: {
     cliente?: {
       id: string;
       nombre: string;
