@@ -216,7 +216,7 @@ const Clientes: React.FC = () => {
 
       {/* Dialog for detailed form */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" aria-describedby="dialog-description">
           <DialogHeader>
             <DialogTitle>Registrar Cliente Detallado</DialogTitle>
           </DialogHeader>

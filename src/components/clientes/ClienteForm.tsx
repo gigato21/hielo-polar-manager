@@ -30,10 +30,12 @@ export function ClienteForm({ onSuccess, onCancel }: ClienteFormProps) {
         telefono: data.contacto.telefono,
         direccion: `${data.ubicacion.calle}, ${data.ubicacion.numero_ext}, ${data.ubicacion.colonia}, ${data.ubicacion.municipio}, ${data.ubicacion.estado}, ${data.ubicacion.cp}`,
         rfc: data.negocio.rfc,
-        imagen: data.negocio.imagen, // Ajustar si es un archivo
-        comodato: data.documentacion.contrato_comodato, // Ajustar si es un archivo
-        notas: data.notas,
+        imagen: data.negocio.imagen || undefined, // Ajustar si es un archivo
+        comodato: data.documentacion.contrato_comodato || undefined, // Ajustar si es un archivo
+        notas: data.notas || "",
       };
+
+      console.log("Datos formateados para guardar:", formattedData);
 
       await createCliente.mutateAsync(formattedData);
       onSuccess(data);

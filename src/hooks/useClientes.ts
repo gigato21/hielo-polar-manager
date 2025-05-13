@@ -23,17 +23,22 @@ const uploadFile = async (file: File, folder: string) => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${folder}/${Math.random().toString(36).substring(2)}.${fileExt}`;
   
-  const { data, error } = await supabase.storage
+  console.log("Archivo recibido para subir:", file);
+
+  const { error: uploadError } = await supabase.storage
     .from(bucket)
-    .upload(fileName, file);
+    .upload(fileName, file, { upsert: true }); // Asegura que los archivos con el mismo nombre se sobrescriban
 
-  if (error) throw error;
+  if (uploadError) {
+    console.error("Error al subir archivo:", uploadError);
+    throw new Error("No se pudo subir el archivo");
+  }
 
-  const { data: urlData } = supabase.storage
+  const publicUrlResponse = supabase.storage
     .from(bucket)
     .getPublicUrl(fileName);
 
-  return urlData.publicUrl;
+  return publicUrlResponse.data.publicUrl;
 };
 
 export const useClientes = () => {
