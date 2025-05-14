@@ -29,20 +29,36 @@ const uploadFile = async (file: File, folder: string) => {
   // Agregar log para verificar el nombre del archivo generado
   console.log("Nombre del archivo limpio:", fileName);
 
+  // Agregar validaciones y logs detallados para depurar el problema
+  if (!file) {
+    console.error("El archivo es nulo o indefinido:", file);
+    throw new Error("El archivo proporcionado no es válido");
+  }
+
+  console.log("Intentando subir archivo:", file.name, "al bucket:", bucket);
+
   const { error: uploadError } = await supabase.storage
     .from(bucket)
-    .upload(fileName, file, { upsert: true }); // Asegura que los archivos con el mismo nombre se sobrescriban
+    .upload(fileName, file, { upsert: true });
 
   if (uploadError) {
-    console.error("Error al subir archivo:", uploadError);
+    console.error("Error al subir archivo a Supabase:", uploadError);
     throw new Error("No se pudo subir el archivo");
   }
+
+  console.log("Archivo subido exitosamente. Generando URL pública...");
 
   const publicUrlResponse = supabase.storage
     .from(bucket)
     .getPublicUrl(fileName);
 
-  const publicUrl = publicUrlResponse.data.publicUrl.replace(/\/\/+/, '/');
+  // Corregir el manejo de errores al generar la URL pública
+  if (!publicUrlResponse.data || !publicUrlResponse.data.publicUrl) {
+    console.error("Error inesperado al generar la URL pública. Respuesta:", publicUrlResponse);
+    throw new Error("No se pudo generar la URL pública");
+  }
+
+  const publicUrl = publicUrlResponse.data.publicUrl;
   console.log("URL pública generada:", publicUrl);
 
   return publicUrl;
