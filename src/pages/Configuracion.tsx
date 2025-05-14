@@ -127,6 +127,17 @@ const Configuracion = () => {
     }
   };
 
+  // Agregar función para manejar el cierre de sesión
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error al cerrar sesión:", error);
+    } else {
+      alert("Sesión cerrada correctamente");
+      window.location.reload(); // Recargar la página para limpiar el estado
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -380,6 +391,9 @@ const Configuracion = () => {
                   </li>
                 ))}
               </ul>
+              <Button variant="secondary" onClick={handleLogout} className="mt-4">
+                Cerrar Sesión
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
