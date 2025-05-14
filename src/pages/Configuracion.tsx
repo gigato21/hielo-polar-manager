@@ -27,6 +27,8 @@ const Configuracion = () => {
   const [notificacionesApp, setNotificacionesApp] = useState(true);
   const [diasAnticipacion, setDiasAnticipacion] = useState("7");
   const [modoOscuro, setModoOscuro] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [nuevoUsuario, setNuevoUsuario] = useState({ email: "", password: "" });
 
   useEffect(() => {
     const testSupabase = async () => {
@@ -39,6 +41,19 @@ const Configuracion = () => {
     };
 
     testSupabase();
+  }, []);
+
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      const { data, error } = await supabase.auth.admin.listUsers();
+      if (error) {
+        console.error("Error al obtener usuarios:", error);
+      } else {
+        setUsuarios(data.users);
+      }
+    };
+
+    fetchUsuarios();
   }, []);
 
   const handleSaveGeneral = async () => {
@@ -88,6 +103,27 @@ const Configuracion = () => {
       console.error("Error al guardar datos de la empresa:", error);
     } else {
       console.log("Datos de la empresa guardados correctamente.");
+    }
+  };
+
+  const handleAddUsuario = async () => {
+    const { email, password } = nuevoUsuario;
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      console.error("Error al agregar usuario:", error);
+    } else {
+      alert("Usuario agregado correctamente");
+      setNuevoUsuario({ email: "", password: "" });
+    }
+  };
+
+  const handleDeleteUsuario = async (id) => {
+    const { error } = await supabase.auth.admin.deleteUser(id);
+    if (error) {
+      console.error("Error al eliminar usuario:", error);
+    } else {
+      alert("Usuario eliminado correctamente");
+      setUsuarios(usuarios.filter((user) => user.id !== id));
     }
   };
 
@@ -311,11 +347,39 @@ const Configuracion = () => {
                 Administra los usuarios que tienen acceso al sistema
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="bg-white dark:bg-black p-6 rounded-md border">
-                <p className="text-muted-foreground">La gestión de usuarios se implementará próximamente.</p>
-                <p className="text-muted-foreground mt-2">Aquí podrás crear, editar y eliminar usuarios, así como asignar roles y permisos.</p>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-usuario">Correo Electrónico</Label>
+                <Input
+                  id="email-usuario"
+                  placeholder="correo@ejemplo.com"
+                  value={nuevoUsuario.email}
+                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, email: e.target.value })}
+                />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="password-usuario">Contraseña</Label>
+                <Input
+                  id="password-usuario"
+                  type="password"
+                  placeholder="Contraseña"
+                  value={nuevoUsuario.password}
+                  onChange={(e) => setNuevoUsuario({ ...nuevoUsuario, password: e.target.value })}
+                />
+              </div>
+              <Button onClick={handleAddUsuario}>Agregar Usuario</Button>
+              <Separator />
+              <h3 className="text-lg font-bold">Usuarios Registrados</h3>
+              <ul className="space-y-2">
+                {usuarios.map((user) => (
+                  <li key={user.id} className="flex justify-between items-center">
+                    <span>{user.email}</span>
+                    <Button variant="destructive" onClick={() => handleDeleteUsuario(user.id)}>
+                      Eliminar
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         </TabsContent>
