@@ -21,10 +21,13 @@ const uploadFile = async (file: File, folder: string) => {
   const bucket = 'clientes';
   
   const fileExt = file.name.split('.').pop();
-  // Asegurarse de que no haya doble slash en la ruta del archivo
-  const fileName = `${folder}/${Math.random().toString(36).substring(2)}.${fileExt}`.replace(/\/\/+/, '/');
-  
+  // Refactorizar para garantizar que no haya doble slash en ninguna parte
+  const cleanFolder = folder.replace(/\/\/+/, '/').replace(/\/$/, '');
+  const fileName = `${cleanFolder}/${Math.random().toString(36).substring(2)}.${fileExt}`;
+
   console.log("Archivo recibido para subir:", file);
+  // Agregar log para verificar el nombre del archivo generado
+  console.log("Nombre del archivo limpio:", fileName);
 
   const { error: uploadError } = await supabase.storage
     .from(bucket)
@@ -39,7 +42,10 @@ const uploadFile = async (file: File, folder: string) => {
     .from(bucket)
     .getPublicUrl(fileName);
 
-  return publicUrlResponse.data.publicUrl;
+  const publicUrl = publicUrlResponse.data.publicUrl.replace(/\/\/+/, '/');
+  console.log("URL pública generada:", publicUrl);
+
+  return publicUrl;
 };
 
 export const useClientes = () => {
