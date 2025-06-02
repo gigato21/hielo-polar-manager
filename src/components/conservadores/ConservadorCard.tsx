@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,7 +140,6 @@ export function ConservadorCard({ conservador }: { conservador: ConservadorData 
           <ConservadorForm
             onSuccess={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)}
-            defaultValues={conservador}
           />
         </DialogContent>
       </Dialog>

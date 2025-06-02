@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Layout } from "@/components/layout/Layout";
+import Layout from "@/components/layout/Layout";
 
 // Pages
 import Dashboard from "@/pages/Dashboard";
@@ -13,9 +13,9 @@ import { MantenimientoPage } from "@/pages/Mantenimiento";
 import Reparaciones from "@/pages/Reparaciones";
 import { OrdenesServicioPage } from "@/pages/OrdenesServicio";
 import Configuracion from "@/pages/Configuracion";
-import Estadisticas from "@/pages/Estadisticas";
+import { EstadisticasPage } from "@/pages/Estadisticas";
 import QRCode from "@/pages/QRCode";
-import Reportes from "@/pages/Reportes";
+import { Reportes } from "@/pages/Reportes";
 import Login from "@/pages/Login";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
@@ -55,7 +55,7 @@ function App() {
               <Route path="/reparaciones" element={<Reparaciones />} />
               <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
               <Route path="/configuracion" element={<Configuracion />} />
-              <Route path="/estadisticas" element={<Estadisticas />} />
+              <Route path="/estadisticas" element={<EstadisticasPage />} />
               <Route path="/qr" element={<QRCode />} />
               <Route path="/reportes" element={<Reportes />} />
               <Route path="/login" element={<Navigate to="/dashboard" replace />} />

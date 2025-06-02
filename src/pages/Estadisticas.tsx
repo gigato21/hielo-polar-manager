@@ -56,3 +56,6 @@ export function EstadisticasPage() {
     </div>
   )
 }
+
+// Default export
+export default EstadisticasPage;
