@@ -13,7 +13,7 @@ import { MantenimientoPage } from "@/pages/Mantenimiento";
 import Reparaciones from "@/pages/Reparaciones";
 import { OrdenesServicioPage } from "@/pages/OrdenesServicio";
 import Configuracion from "@/pages/Configuracion";
-import { EstadisticasPage } from "@/pages/Estadisticas";
+import EstadisticasPage from "@/pages/Estadisticas";
 import QRCode from "@/pages/QRCode";
 import { Reportes } from "@/pages/Reportes";
 import Login from "@/pages/Login";
@@ -45,22 +45,22 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/clientes" element={<Clientes />} />
-              <Route path="/conservadores" element={<Conservadores />} />
-              <Route path="/mantenimiento" element={<MantenimientoPage />} />
-              <Route path="/reparaciones" element={<Reparaciones />} />
-              <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
-              <Route path="/configuracion" element={<Configuracion />} />
-              <Route path="/estadisticas" element={<EstadisticasPage />} />
-              <Route path="/qr" element={<QRCode />} />
-              <Route path="/reportes" element={<Reportes />} />
-              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </Layout>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="clientes" element={<Clientes />} />
+              <Route path="conservadores" element={<Conservadores />} />
+              <Route path="mantenimiento" element={<MantenimientoPage />} />
+              <Route path="reparaciones" element={<Reparaciones />} />
+              <Route path="ordenes-servicio" element={<OrdenesServicioPage />} />
+              <Route path="configuracion" element={<Configuracion />} />
+              <Route path="estadisticas" element={<EstadisticasPage />} />
+              <Route path="qr" element={<QRCode />} />
+              <Route path="reportes" element={<Reportes />} />
+              <Route path="login" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
         </BrowserRouter>
         <Sonner />
       </TooltipProvider>
