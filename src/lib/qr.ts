@@ -7,13 +7,27 @@ export const generateQRCode = async (
   conservadorInfo?: any,
   options: QRCode.QRCodeToDataURLOptions = {}
 ) => {
-  // Base URL for the conservador
+  // Base URL for the conservador with proper routing
   const baseUrl = `${window.location.origin}/conservador/${conservadorId}`
   
-  // Create a URL with query parameters for Odoo integration
-  // This is a placeholder - actual Odoo integration would require proper URL structure
-  const odooParams = clienteInfo ? `?cliente=${encodeURIComponent(clienteInfo.nombre || '')}` : ''
-  const url = `${baseUrl}${odooParams}`
+  // Create a URL with query parameters for better functionality
+  const params = new URLSearchParams();
+  
+  if (clienteInfo?.nombre) {
+    params.append('cliente', clienteInfo.nombre);
+  }
+  if (clienteInfo?.id) {
+    params.append('cliente_id', clienteInfo.id);
+  }
+  if (conservadorInfo?.numero_serie) {
+    params.append('serie', conservadorInfo.numero_serie);
+  }
+  if (conservadorInfo?.modelo) {
+    params.append('modelo', conservadorInfo.modelo);
+  }
+  
+  const queryString = params.toString();
+  const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
   
   try {
     // @ts-ignore - ignoring TS error for module resolution
@@ -24,6 +38,7 @@ export const generateQRCode = async (
         dark: '#000000',
         light: '#ffffff',
       },
+      errorCorrectionLevel: 'M',
       ...options,
     })
     return qrDataUrl
@@ -42,10 +57,24 @@ export const generateQRCodeSVG = async (
   // Base URL for the conservador
   const baseUrl = `${window.location.origin}/conservador/${conservadorId}`
   
-  // Create a URL with query parameters for Odoo integration
-  // This is a placeholder - actual Odoo integration would require proper URL structure
-  const odooParams = clienteInfo ? `?cliente=${encodeURIComponent(clienteInfo.nombre || '')}` : ''
-  const url = `${baseUrl}${odooParams}`
+  // Create a URL with query parameters for better functionality
+  const params = new URLSearchParams();
+  
+  if (clienteInfo?.nombre) {
+    params.append('cliente', clienteInfo.nombre);
+  }
+  if (clienteInfo?.id) {
+    params.append('cliente_id', clienteInfo.id);
+  }
+  if (conservadorInfo?.numero_serie) {
+    params.append('serie', conservadorInfo.numero_serie);
+  }
+  if (conservadorInfo?.modelo) {
+    params.append('modelo', conservadorInfo.modelo);
+  }
+  
+  const queryString = params.toString();
+  const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
   
   try {
     // @ts-ignore - ignoring TS error for module resolution
@@ -56,6 +85,7 @@ export const generateQRCodeSVG = async (
         dark: '#000000',
         light: '#ffffff',
       },
+      errorCorrectionLevel: 'M',
       ...options,
     })
     return qrSvg
@@ -63,4 +93,35 @@ export const generateQRCodeSVG = async (
     console.error('Error generating QR code SVG:', err)
     throw err
   }
+}
+
+// Función para generar múltiples QRs en lote
+export const generateBatchQRCodes = async (conservadores: any[]) => {
+  const results = [];
+  
+  for (const conservador of conservadores) {
+    try {
+      const qrDataUrl = await generateQRCode(
+        conservador.id,
+        conservador.cliente,
+        conservador
+      );
+      
+      results.push({
+        conservador,
+        qrDataUrl,
+        success: true
+      });
+    } catch (error) {
+      console.error(`Error generating QR for conservador ${conservador.id}:`, error);
+      results.push({
+        conservador,
+        qrDataUrl: null,
+        success: false,
+        error: error
+      });
+    }
+  }
+  
+  return results;
 }

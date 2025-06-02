@@ -6,17 +6,50 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScanQrCode } from "lucide-react";
+import { useConservadores } from "@/hooks/useConservadores";
+import { QrBatchGenerator } from "@/components/qr/QrBatchGenerator";
+import { generateQRCode } from "@/lib/qr";
+import { toast } from "sonner";
 
 const QRCode = () => {
   const [conservadorId, setConservadorId] = useState("");
   const [qrValue, setQrValue] = useState("");
+  const { conservadores, isLoading } = useConservadores();
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (conservadorId) {
-      // In a real app, this would include a proper URL to your application
-      // For example: https://yourdomain.com/conservador/123
-      setQrValue(`https://hielopolar.com/conservador/${conservadorId}`);
+      try {
+        // Buscar el conservador en la base de datos
+        const conservador = conservadores?.find(c => c.numero_serie === conservadorId || c.id === conservadorId);
+        
+        if (conservador) {
+          const qrDataUrl = await generateQRCode(
+            conservador.id,
+            conservador.cliente,
+            conservador
+          );
+          setQrValue(qrDataUrl);
+          toast.success("Código QR generado exitosamente");
+        } else {
+          // Si no se encuentra, generar con ID manual
+          const qrDataUrl = await generateQRCode(conservadorId);
+          setQrValue(qrDataUrl);
+          toast.success("Código QR generado exitosamente");
+        }
+      } catch (error) {
+        console.error("Error generando QR:", error);
+        toast.error("Error al generar el código QR");
+      }
+    }
+  };
+
+  const downloadQR = () => {
+    if (qrValue) {
+      const link = document.createElement('a');
+      link.download = `qr-conservador-${conservadorId}.png`;
+      link.href = qrValue;
+      link.click();
+      toast.success("QR descargado exitosamente");
     }
   };
 
@@ -38,15 +71,15 @@ const QRCode = () => {
               <CardHeader>
                 <CardTitle>Generar Código QR</CardTitle>
                 <CardDescription>
-                  Ingrese el ID del conservador para generar un código QR único
+                  Ingrese el ID o número de serie del conservador para generar un código QR único
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="conservador-id">ID del Conservador</Label>
+                  <Label htmlFor="conservador-id">ID o Número de Serie del Conservador</Label>
                   <Input
                     id="conservador-id"
-                    placeholder="Ej. C1234"
+                    placeholder="Ej. C1234 o número de serie"
                     value={conservadorId}
                     onChange={(e) => setConservadorId(e.target.value)}
                   />
@@ -54,9 +87,9 @@ const QRCode = () => {
                 <Button 
                   onClick={handleGenerate} 
                   className="w-full" 
-                  disabled={!conservadorId}
+                  disabled={!conservadorId || isLoading}
                 >
-                  Generar QR
+                  {isLoading ? "Cargando..." : "Generar QR"}
                 </Button>
               </CardContent>
             </Card>
@@ -70,13 +103,10 @@ const QRCode = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center space-y-4">
-                  <QrCodeGenerator value={qrValue} size={200} />
+                  <img src={qrValue} alt="QR Code" className="border rounded-md" />
                   <div className="flex gap-2">
                     <Button onClick={() => window.print()}>Imprimir</Button>
-                    <Button variant="outline" onClick={() => {
-                      // In a real app, we would use a library to download the QR code as an image
-                      alert("Funcionalidad de descarga implementada aquí");
-                    }}>
+                    <Button variant="outline" onClick={downloadQR}>
                       Descargar
                     </Button>
                   </div>
@@ -87,28 +117,7 @@ const QRCode = () => {
         </TabsContent>
 
         <TabsContent value="lote">
-          <Card>
-            <CardHeader>
-              <CardTitle>Generación por Lote</CardTitle>
-              <CardDescription>
-                Genere códigos QR para múltiples conservadores a la vez
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-12 border-2 border-dashed rounded-lg">
-                <div className="text-center">
-                  <ScanQrCode className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-2 text-sm font-semibold">Generación por Lote</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Esta funcionalidad permite generar códigos QR para múltiples conservadores a la vez.
-                  </p>
-                  <div className="mt-4">
-                    <Button>Seleccionar Conservadores</Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <QrBatchGenerator conservadores={conservadores || []} isLoading={isLoading} />
         </TabsContent>
       </Tabs>
     </div>
