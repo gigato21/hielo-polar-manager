@@ -1,52 +1,68 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+
+import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/layout/Layout";
-import Dashboard from './pages/Dashboard'; 
-import Clientes from './pages/Clientes';
-import Conservadores from './pages/Conservadores';
-import { MantenimientoPage } from './pages/Mantenimiento';
-import { Reportes } from './pages/Reportes';
-import QRCode from './pages/QRCode';
-import { EstadisticasPage } from './pages/Estadisticas'; 
-import Configuracion from './pages/Configuracion';
-import { OrdenesServicioPage } from './pages/OrdenesServicio';
-import Reparaciones from './pages/Reparaciones';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
 
-// Initialize queryClient outside the component
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
+// Pages
+import Dashboard from "@/pages/Dashboard";
+import Clientes from "@/pages/Clientes";
+import Conservadores from "@/pages/Conservadores";
+import { MantenimientoPage } from "@/pages/Mantenimiento";
+import Reparaciones from "@/pages/Reparaciones";
+import { OrdenesServicioPage } from "@/pages/OrdenesServicio";
+import Configuracion from "@/pages/Configuracion";
+import Estadisticas from "@/pages/Estadisticas";
+import QRCode from "@/pages/QRCode";
+import Reportes from "@/pages/Reportes";
+import Login from "@/pages/Login";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+
+const queryClient = new QueryClient();
 
 function App() {
+  const { user } = useSupabaseAuth();
+
+  // Si no hay usuario autenticado, mostrar el login
+  if (!user) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </BrowserRouter>
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Router>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/clientes" element={<Clientes />} />
               <Route path="/conservadores" element={<Conservadores />} />
               <Route path="/mantenimiento" element={<MantenimientoPage />} />
-              <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
               <Route path="/reparaciones" element={<Reparaciones />} />
-              <Route path="/reportes" element={<Reportes />} />
+              <Route path="/ordenes-servicio" element={<OrdenesServicioPage />} />
               <Route path="/configuracion" element={<Configuracion />} />
+              <Route path="/estadisticas" element={<Estadisticas />} />
               <Route path="/qr" element={<QRCode />} />
-              <Route path="/estadisticas" element={<EstadisticasPage />} />
-            </Route>
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </Router>
+              <Route path="/reportes" element={<Reportes />} />
+              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+        <Sonner />
       </TooltipProvider>
     </QueryClientProvider>
   );

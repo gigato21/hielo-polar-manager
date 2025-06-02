@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 const Configuracion = () => {
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
@@ -29,6 +30,16 @@ const Configuracion = () => {
   const [modoOscuro, setModoOscuro] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [nuevoUsuario, setNuevoUsuario] = useState({ email: "", password: "" });
+  const [empresaData, setEmpresaData] = useState({
+    nombre: "",
+    rfc: "",
+    direccion: "",
+    ciudad: "",
+    estado: "",
+    cp: "",
+    telefono: "",
+    email: "",
+  });
 
   useEffect(() => {
     const testSupabase = async () => {
@@ -57,85 +68,135 @@ const Configuracion = () => {
   }, []);
 
   const handleSaveGeneral = async () => {
-    const config = {
-      id: "1", // Asegúrate de que la tabla tenga una columna `id` única
-      modoOscuro,
-    };
+    try {
+      const config = {
+        id: "1",
+        modoOscuro,
+      };
 
-    const { error } = await supabase
-      .from("configuracion")
-      .upsert(config, { onConflict: "id" }); // Cambié el array por una cadena
+      const { error } = await supabase
+        .from("configuracion")
+        .upsert(config, { onConflict: "id" });
 
-    if (error) {
-      console.error("Error al guardar configuración general:", error);
-    } else {
-      console.log("Configuración general guardada correctamente.");
+      if (error) {
+        console.error("Error al guardar configuración general:", error);
+        toast.error("Error al guardar la configuración general");
+      } else {
+        console.log("Configuración general guardada correctamente.");
+        toast.success("Configuración general guardada correctamente");
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+      toast.error("Error inesperado al guardar la configuración");
     }
   };
 
-  const handleSaveNotificaciones = () => {
-    console.log("Guardando configuración de notificaciones...");
-    // Aquí puedes agregar lógica para guardar los datos en un backend o almacenamiento local
+  const handleSaveNotificaciones = async () => {
+    try {
+      // Simular guardado de notificaciones (aquí puedes agregar la lógica real)
+      console.log("Guardando configuración de notificaciones...", {
+        notificacionesEmail,
+        notificacionesApp,
+        diasAnticipacion,
+      });
+      
+      // Simular delay de guardado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      toast.success("Configuración de notificaciones guardada correctamente");
+    } catch (error) {
+      console.error("Error al guardar notificaciones:", error);
+      toast.error("Error al guardar la configuración de notificaciones");
+    }
   };
 
   const handleSaveEmpresa = async () => {
-    const empresaData = {
-      id: "1", // Asegúrate de que la tabla tenga una columna `id` única
-      nombre: (document.getElementById("nombre-empresa") as HTMLInputElement).value,
-      rfc: (document.getElementById("rfc") as HTMLInputElement).value,
-      direccion: (document.getElementById("direccion") as HTMLInputElement).value,
-      ciudad: (document.getElementById("ciudad") as HTMLInputElement).value,
-      estado: (document.getElementById("estado") as HTMLInputElement).value,
-      cp: (document.getElementById("cp") as HTMLInputElement).value,
-      telefono: (document.getElementById("telefono") as HTMLInputElement).value,
-      email: (document.getElementById("email-empresa") as HTMLInputElement).value,
-    };
+    try {
+      const empresaDataToSave = {
+        id: "1",
+        ...empresaData,
+      };
 
-    console.log("Datos enviados a Supabase:", empresaData);
+      console.log("Datos enviados a Supabase:", empresaDataToSave);
 
-    const { error } = await supabase
-      .from("empresa")
-      .upsert(empresaData, { onConflict: "id" });
+      const { error } = await supabase
+        .from("empresa")
+        .upsert(empresaDataToSave, { onConflict: "id" });
 
-    console.log("Respuesta de Supabase:", { error });
+      console.log("Respuesta de Supabase:", { error });
 
-    if (error) {
-      console.error("Error al guardar datos de la empresa:", error);
-    } else {
-      console.log("Datos de la empresa guardados correctamente.");
+      if (error) {
+        console.error("Error al guardar datos de la empresa:", error);
+        toast.error("Error al guardar los datos de la empresa");
+      } else {
+        console.log("Datos de la empresa guardados correctamente.");
+        toast.success("Datos de la empresa guardados correctamente");
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+      toast.error("Error inesperado al guardar los datos de la empresa");
     }
   };
 
   const handleAddUsuario = async () => {
-    const { email, password } = nuevoUsuario;
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      console.error("Error al agregar usuario:", error);
-    } else {
-      alert("Usuario agregado correctamente");
-      setNuevoUsuario({ email: "", password: "" });
+    try {
+      const { email, password } = nuevoUsuario;
+      if (!email || !password) {
+        toast.error("Por favor, completa todos los campos");
+        return;
+      }
+
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        console.error("Error al agregar usuario:", error);
+        toast.error("Error al agregar usuario: " + error.message);
+      } else {
+        toast.success("Usuario agregado correctamente");
+        setNuevoUsuario({ email: "", password: "" });
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+      toast.error("Error inesperado al agregar usuario");
     }
   };
 
   const handleDeleteUsuario = async (id) => {
-    const { error } = await supabase.auth.admin.deleteUser(id);
-    if (error) {
-      console.error("Error al eliminar usuario:", error);
-    } else {
-      alert("Usuario eliminado correctamente");
-      setUsuarios(usuarios.filter((user) => user.id !== id));
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(id);
+      if (error) {
+        console.error("Error al eliminar usuario:", error);
+        toast.error("Error al eliminar usuario: " + error.message);
+      } else {
+        toast.success("Usuario eliminado correctamente");
+        setUsuarios(usuarios.filter((user) => user.id !== id));
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+      toast.error("Error inesperado al eliminar usuario");
     }
   };
 
-  // Agregar función para manejar el cierre de sesión
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error al cerrar sesión:", error);
-    } else {
-      alert("Sesión cerrada correctamente");
-      window.location.reload(); // Recargar la página para limpiar el estado
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error al cerrar sesión:", error);
+        toast.error("Error al cerrar sesión: " + error.message);
+      } else {
+        toast.success("Sesión cerrada correctamente");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+      toast.error("Error inesperado al cerrar sesión");
     }
+  };
+
+  const handleEmpresaChange = (field: string, value: string) => {
+    setEmpresaData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -214,7 +275,11 @@ const Configuracion = () => {
                     Cambiar entre tema claro y oscuro
                   </p>
                 </div>
-                <Switch id="modo-oscuro" />
+                <Switch 
+                  id="modo-oscuro" 
+                  checked={modoOscuro}
+                  onCheckedChange={setModoOscuro}
+                />
               </div>
             </CardContent>
             <CardFooter>
@@ -305,42 +370,82 @@ const Configuracion = () => {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="nombre-empresa">Nombre de la Empresa</Label>
-                  <Input id="nombre-empresa" placeholder="Hielo Polar S.A. de C.V." />
+                  <Input 
+                    id="nombre-empresa" 
+                    placeholder="Hielo Polar S.A. de C.V." 
+                    value={empresaData.nombre}
+                    onChange={(e) => handleEmpresaChange('nombre', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="rfc">RFC</Label>
-                  <Input id="rfc" placeholder="XAXX010101000" />
+                  <Input 
+                    id="rfc" 
+                    placeholder="XAXX010101000" 
+                    value={empresaData.rfc}
+                    onChange={(e) => handleEmpresaChange('rfc', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="direccion">Dirección</Label>
-                  <Input id="direccion" placeholder="Calle, número, colonia" />
+                  <Input 
+                    id="direccion" 
+                    placeholder="Calle, número, colonia" 
+                    value={empresaData.direccion}
+                    onChange={(e) => handleEmpresaChange('direccion', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="ciudad">Ciudad</Label>
-                  <Input id="ciudad" placeholder="Ciudad" />
+                  <Input 
+                    id="ciudad" 
+                    placeholder="Ciudad" 
+                    value={empresaData.ciudad}
+                    onChange={(e) => handleEmpresaChange('ciudad', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="estado">Estado</Label>
-                  <Input id="estado" placeholder="Estado" />
+                  <Input 
+                    id="estado" 
+                    placeholder="Estado" 
+                    value={empresaData.estado}
+                    onChange={(e) => handleEmpresaChange('estado', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="cp">Código Postal</Label>
-                  <Input id="cp" placeholder="00000" />
+                  <Input 
+                    id="cp" 
+                    placeholder="00000" 
+                    value={empresaData.cp}
+                    onChange={(e) => handleEmpresaChange('cp', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="telefono">Teléfono</Label>
-                  <Input id="telefono" placeholder="(123) 456-7890" />
+                  <Input 
+                    id="telefono" 
+                    placeholder="(123) 456-7890" 
+                    value={empresaData.telefono}
+                    onChange={(e) => handleEmpresaChange('telefono', e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="email-empresa">Email</Label>
-                  <Input id="email-empresa" placeholder="contacto@ejemplo.com" />
+                  <Input 
+                    id="email-empresa" 
+                    placeholder="contacto@ejemplo.com" 
+                    value={empresaData.email}
+                    onChange={(e) => handleEmpresaChange('email', e.target.value)}
+                  />
                 </div>
               </div>
             </CardContent>

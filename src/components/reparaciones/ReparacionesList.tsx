@@ -1,56 +1,39 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { Search, Plus, AlertCircle, CheckCircle2, Clock, X, Tool } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useReparaciones, Reparacion } from "@/hooks/useReparaciones";
+import { toast } from "sonner";
+import { useReparaciones } from "@/hooks/useReparaciones";
 import { ReparacionForm } from "./ReparacionForm";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Wrench, Plus, Edit, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 export function ReparacionesList() {
   const { reparaciones, isLoading, createReparacion, updateReparacion, deleteReparacion } = useReparaciones();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
-  const [selectedReparacion, setSelectedReparacion] = useState<Reparacion | null>(null);
-
-  // Filter reparaciones based on search term
-  const filteredReparaciones = reparaciones ? reparaciones.filter((reparacion) => 
-    reparacion.descripcion_problema?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reparacion.conservador?.numero_serie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reparacion.conservador?.cliente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reparacion.tecnico?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedReparacion, setSelectedReparacion] = useState<any>(null);
 
   const handleCreate = (formData: any) => {
-    createReparacion.mutate({
-      ...formData,
-      fecha_reporte: format(formData.fecha_reporte, "yyyy-MM-dd"),
-      fecha_reparacion: formData.fecha_reparacion ? format(formData.fecha_reparacion, "yyyy-MM-dd") : null,
-    }, {
+    createReparacion.mutate(formData, {
       onSuccess: () => {
         setIsCreateDialogOpen(false);
+        toast.success("Reparación creada correctamente");
+      },
+      onError: (error) => {
+        toast.error(`Error al crear reparación: ${error.message}`);
       }
     });
   };
@@ -58,15 +41,19 @@ export function ReparacionesList() {
   const handleUpdate = (formData: any) => {
     if (!selectedReparacion) return;
 
-    updateReparacion.mutate({
-      id: selectedReparacion.id,
+    const updateData = {
       ...formData,
-      fecha_reporte: format(formData.fecha_reporte, "yyyy-MM-dd"),
-      fecha_reparacion: formData.fecha_reparacion ? format(formData.fecha_reparacion, "yyyy-MM-dd") : null,
-    }, {
+      id: selectedReparacion.id,
+    };
+
+    updateReparacion.mutate(updateData, {
       onSuccess: () => {
         setIsUpdateDialogOpen(false);
         setSelectedReparacion(null);
+        toast.success("Reparación actualizada correctamente");
+      },
+      onError: (error) => {
+        toast.error(`Error al actualizar reparación: ${error.message}`);
       }
     });
   };
@@ -78,148 +65,118 @@ export function ReparacionesList() {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
         setSelectedReparacion(null);
+        toast.success("Reparación eliminada correctamente");
+      },
+      onError: (error) => {
+        toast.error(`Error al eliminar reparación: ${error.message}`);
       }
     });
   };
 
-  const openUpdateDialog = (reparacion: Reparacion) => {
+  const openUpdateDialog = (reparacion: any) => {
     setSelectedReparacion(reparacion);
     setIsUpdateDialogOpen(true);
   };
 
-  const openDeleteDialog = (reparacion: Reparacion) => {
+  const openDeleteDialog = (reparacion: any) => {
     setSelectedReparacion(reparacion);
     setIsDeleteDialogOpen(true);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "pendiente":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-          <AlertCircle className="mr-1 h-3 w-3" /> Pendiente
-        </Badge>;
-      case "en_proceso":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800">
-          <Clock className="mr-1 h-3 w-3" /> En proceso
-        </Badge>;
-      case "completada":
-        return <Badge variant="outline" className="bg-green-100 text-green-800">
-          <CheckCircle2 className="mr-1 h-3 w-3" /> Completada
-        </Badge>;
-      case "cancelada":
-        return <Badge variant="outline" className="bg-red-100 text-red-800">
-          <X className="mr-1 h-3 w-3" /> Cancelada
-        </Badge>;
+      case 'completada':
+        return 'default';
+      case 'en_proceso':
+        return 'secondary';
+      case 'pendiente':
+        return 'outline';
+      case 'cancelada':
+        return 'destructive';
       default:
-        return <Badge>{status}</Badge>;
+        return 'outline';
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-10">
+        <p>Cargando reparaciones...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar reparaciones..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="whitespace-nowrap"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Nueva reparación
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Lista de Reparaciones</h2>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Reparación
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center p-10">
-          <p>Cargando reparaciones...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredReparaciones.length > 0 ? (
-            filteredReparaciones.map((reparacion) => (
-              <Card key={reparacion.id} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {reparacion.conservador?.numero_serie || "Sin conservador"} 
-                      </CardTitle>
-                      <CardDescription>
-                        {reparacion.conservador?.cliente?.nombre || "Cliente no asignado"}
-                      </CardDescription>
-                    </div>
-                    {getStatusBadge(reparacion.status)}
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Problema:</p>
-                    <p className="text-sm text-muted-foreground">{reparacion.descripcion_problema}</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <p className="text-sm font-medium">Fecha de reporte:</p>
-                      <p className="text-sm text-muted-foreground">
-                        {reparacion.fecha_reporte ? 
-                          format(new Date(reparacion.fecha_reporte), "dd/MM/yyyy", { locale: es }) : 
-                          "No disponible"}
-                      </p>
-                    </div>
-                    {reparacion.fecha_reparacion && (
-                      <div>
-                        <p className="text-sm font-medium">Fecha reparación:</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(reparacion.fecha_reparacion), "dd/MM/yyyy", { locale: es })}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {(reparacion.tecnico || reparacion.costo !== null) && (
-                    <div className="grid grid-cols-2 gap-4 mt-2">
-                      {reparacion.tecnico && (
-                        <div>
-                          <p className="text-sm font-medium">Técnico:</p>
-                          <p className="text-sm text-muted-foreground">{reparacion.tecnico}</p>
-                        </div>
-                      )}
-                      {reparacion.costo !== null && (
-                        <div>
-                          <p className="text-sm font-medium">Costo:</p>
-                          <p className="text-sm text-muted-foreground">
-                            ${reparacion.costo.toLocaleString()}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex justify-between pt-2">
-                  <Button variant="outline" onClick={() => openUpdateDialog(reparacion)}>
-                    Editar
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {reparaciones && reparaciones.length > 0 ? (
+          reparaciones.map((reparacion) => (
+            <Card key={reparacion.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">
+                    {reparacion.conservador?.numero_serie || 'Sin conservador'}
+                  </CardTitle>
+                  <Badge variant={getStatusBadgeVariant(reparacion.status)}>
+                    {reparacion.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Problema:</strong> {reparacion.descripcion_problema}
+                </p>
+                <p className="text-sm">
+                  <strong>Fecha reporte:</strong> {format(new Date(reparacion.fecha_reporte), 'dd/MM/yyyy')}
+                </p>
+                {reparacion.fecha_reparacion && (
+                  <p className="text-sm">
+                    <strong>Fecha reparación:</strong> {format(new Date(reparacion.fecha_reparacion), 'dd/MM/yyyy')}
+                  </p>
+                )}
+                {reparacion.tecnico && (
+                  <p className="text-sm">
+                    <strong>Técnico:</strong> {reparacion.tecnico}
+                  </p>
+                )}
+                {reparacion.costo && (
+                  <p className="text-sm">
+                    <strong>Costo:</strong> ${reparacion.costo}
+                  </p>
+                )}
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openUpdateDialog(reparacion)}
+                  >
+                    <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="destructive" onClick={() => openDeleteDialog(reparacion)}>
-                    Eliminar
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openDeleteDialog(reparacion)}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
-                </CardFooter>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full flex justify-center items-center p-10">
-              <p className="text-muted-foreground">
-                {searchTerm
-                  ? "No se encontraron reparaciones que coincidan con la búsqueda."
-                  : "No hay reparaciones registradas."}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full flex justify-center items-center p-10">
+            <p className="text-muted-foreground">No hay reparaciones registradas.</p>
+          </div>
+        )}
+      </div>
 
       {/* Create Dialog */}
       <ReparacionForm
@@ -244,17 +201,14 @@ export function ReparacionesList() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente la reparación y no se puede deshacer.
+              Esta acción no se puede deshacer. Se eliminará permanentemente la reparación.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-700"
-            >
+            <AlertDialogAction onClick={handleDelete}>
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
